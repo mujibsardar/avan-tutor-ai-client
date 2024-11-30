@@ -1,65 +1,42 @@
-body {
-  margin: 0;
-  background: linear-gradient(180deg, rgb(117, 81, 194), rgb(255, 255, 255));
-  display: flex;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  height: 100vh;
-  width: 100vw;
-  justify-content: center;
-  align-items: center;
-}
+@import url("https://fonts.googleapis.com/css2?family=Mouse+Memoirs:wght@400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap");
 
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
+:root {
+  /* fonts */
+  --single-line-body-base: Inter;
+  --font-mouse-memoirs: "Mouse Memoirs";
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-  color: white;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+  /* font sizes */
+  --single-line-body-base-size: 16px;
+  --font-size-5xl: 24px;
+  --font-size-lgi: 19px;
 
-ul {
-  padding-inline-start: 0;
-  margin-block-start: 0;
-  margin-block-end: 0;
-  list-style-type: none;
-  display: flex;
-  flex-direction: column;
-  margin: 8px 0;
-  border: 1px solid black;
-  gap: 1px;
-  background-color: black;
-  border-radius: 8px;
-  overflow: auto;
-}
+  /* Colors */
+  --background-default-default: #fff;
+  --color-mediumorchid-100: #9e4ec0;
+  --color-mediumorchid-200: rgba(158, 78, 192, 0.8);
+  --color-darkslategray: #413d3d;
+  --color-black: #000;
+  --text-default-secondary: #757575;
+  --text-default-default: #1e1e1e;
+  --border-default-default: #d9d9d9;
 
-li {
-  background-color: white;
-  padding: 8px;
-}
+  /* Spacing */
+  --space-300: 12px;
+  --space-400: 16px;
+  --radius-200: 8px;
 
-li:hover {
-  background: #dadbf9;
-}
+  /* Gaps */
+  --gap-70xl: 89px;
+  --gap-25xl: 44px;
+  --gap-3xl: 22px;
+  --gap-19xl: 38px;
+  --gap-lgi: 19px;
+  --gap-xs: 12px;
+  --gap-smi: 13px;
 
-a {
-  font-weight: 800;
-  text-decoration: none;
+  /* Paddings */
+  --padding-4xs: 9px;
+  --padding-38xl: 57px;
+  /* (Add the rest of your padding variables here) */
 }
