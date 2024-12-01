@@ -1,19 +1,21 @@
 // src/components/InputSection.js
-import React, { useState } from "react";
+import { useState } from "react";
 
 function InputSection() {
   const [inputText, setInputText] = useState("");
 
-  const handleTextChange = (e) => setInputText(e.target.value);
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setInputText(e.target.value);
 
   const handleSubmit = () => {
     // Trigger AI Lambda function or API call here
     console.log("Submitted:", inputText);
   };
 
-  const handleUpload = (e) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Handle document upload logic here
-    console.log("Uploaded file:", e.target.files[0]);
+    if (e.target.files && e.target.files[0]) {
+      console.log("Uploaded file:", e.target.files[0]);
+    }
   };
 
   return (
@@ -22,8 +24,8 @@ function InputSection() {
         value={inputText}
         onChange={handleTextChange}
         placeholder="Enter your text here..."
-        rows="10"
-        cols="30"
+        rows={10}
+        cols={30}
       />
       <div className="input-actions">
         <button onClick={handleSubmit}>Submit</button>

@@ -1,5 +1,4 @@
 // src/components/SplitScreen.js
-import React from "react";
 import InputSection from "./InputSection";
 import OutputSection from "./OutputSection";
 

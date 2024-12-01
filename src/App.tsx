@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import Header from "./components/Header";
 import SplitScreen from "./components/SplitScreen";
