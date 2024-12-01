@@ -1,6 +1,10 @@
-import React from "react";
+import { AuthUser } from "../types";
+interface HeaderProps {
+  signOut: () => void;
+  user?: AuthUser;
+}
 
-function Header({ signOut, user }) {
+function Header({ signOut, user }: HeaderProps) {
   return (
     <header className="header">
       <h1>Avantutor.ai</h1>
@@ -8,7 +12,7 @@ function Header({ signOut, user }) {
         <h2>Welcome</h2>
       ) : (
         <>
-          <h2>Welcome, {user?.signInDetails?.loginId}</h2>
+          <h2>Welcome, {user.signInDetails?.loginId}</h2>
           <p>Credits: 10</p> {/* Replace with dynamic credits */}
           <button onClick={signOut}>Log Out</button>
         </>

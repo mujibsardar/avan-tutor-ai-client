@@ -1,5 +1,5 @@
 // src/components/OutputSection.js
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 
 function OutputSection() {
   const [output, setOutput] = useState("");
