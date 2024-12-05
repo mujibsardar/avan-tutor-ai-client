@@ -1,14 +1,23 @@
-// src/components/InputSection.js
 import { useState } from "react";
+import { fetchAIResponse } from "../utils/api"; // Assuming you've set up the API utility
 
-function InputSection() {
-  const [inputText, setInputText] = useState("");
+interface InputSectionProps {
+  onSubmit: (response: string) => void; // Function to handle API response
+}
+
+function InputSection({ onSubmit }: InputSectionProps) {
+  const [inputText, setInputText] = useState<string>("");
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setInputText(e.target.value);
 
-  const handleSubmit = () => {
-    // Trigger AI Lambda function or API call here
-    console.log("Submitted:", inputText);
+  const handleSubmit = async () => {
+    // Call the API and pass the result to onSubmit
+    try {
+      const response = await fetchAIResponse(inputText);
+      onSubmit(response.aiGuidance); // Adjust according to your API response structure
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,15 +1,21 @@
-// src/components/SplitScreen.js
+import { useState } from "react";
 import InputSection from "./InputSection";
 import OutputSection from "./OutputSection";
 
 function SplitScreen() {
+  const [output, setOutput] = useState<string>("");
+
+  const handleAPIResponse = (response: string) => {
+    setOutput(response);
+  };
+
   return (
     <div className="split-screen">
       <div className="input-section">
-        <InputSection />
+        <InputSection onSubmit={handleAPIResponse} />
       </div>
       <div className="output-section">
-        <OutputSection />
+        <OutputSection output={output} />
       </div>
     </div>
   );

@@ -1,20 +1,12 @@
-// src/components/OutputSection.js
-import  { useState, useEffect } from "react";
+interface OutputSectionProps {
+  output: string;
+}
 
-function OutputSection() {
-  const [output, setOutput] = useState("");
-
-  useEffect(() => {
-    // Simulate an AI response after submitting input
-    setTimeout(() => {
-      setOutput("AI's response to your input will appear here...");
-    }, 2000);
-  }, []);
-
+function OutputSection({ output }: OutputSectionProps) {
   return (
     <div className="output-section-content">
       <h2>AI Response:</h2>
-      <p>{output}</p>
+      <p>{output || "Waiting for input..."}</p>
     </div>
   );
 }
