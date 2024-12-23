@@ -1,10 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-
-// Replace this with your actual API Gateway URL
-// ORIGINAL 
-// const API_BASE_URL = "https://4v56b6gpia.execute-api.us-west-2.amazonaws.com/prod";
-// NEW
-const API_BASE_URL = "https://57xsoxbzr0.execute-api.us-west-2.amazonaws.com/prod"; 
+const API_BASE_URL = "https://j41d2f5t31.execute-api.us-west-2.amazonaws.com/prod"; 
 
 // Define the type of the expected response data for AI response
 interface AIResponse {
@@ -12,12 +7,47 @@ interface AIResponse {
   aiGuidance: string; // Modify this based on the actual structure of your API's response
 }
 
-// Define the type of the expected response for file upload
-// UNUSED
-// interface FileUploadResponse {
-//   message: string; // Adjust based on API response
-//   s3Url?: string; // Optional URL if your Lambda uploads to S3
-// }
+// Define the type for the new session request payload
+interface NewSessionRequest {
+  studentId: string;
+  sessionName: string;
+}
+
+// Define the type for the expected response data
+interface NewSessionResponse {
+  sessionId: string;
+  studentId: string;
+  sessionName: string;
+  uploadedFiles: any[]; // Update this based on your schema if necessary
+  history: any[]; // Update this based on your schema if necessary
+  createdAt: string;
+}
+
+// Create a new session
+export const createNewSession = async (newSession: NewSessionRequest): Promise<NewSessionResponse> => {
+  try {
+    // Make a POST request to the sessions endpoint
+    const response: AxiosResponse<NewSessionResponse> = await axios.post(
+      `${API_BASE_URL}/sessions`,
+      newSession,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("New session created successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Error creating new session:", error.message, error.response?.data);
+    } else {
+      console.error("Unknown error:", error);
+    }
+    throw error;
+  }
+};
 
 // Fetch AI response based on input text
 export const fetchAIResponse = async (inputText: string): Promise<AIResponse> => {
@@ -46,31 +76,4 @@ export const fetchAIResponse = async (inputText: string): Promise<AIResponse> =>
   }
 };
 
-// Upload file to the API
-// UNUSED
-// export const uploadFileToApi = async (formData: FormData): Promise<FileUploadResponse> => {
-//   try {
-//     const apiKey = import.meta.env.VITE_API_KEY;
-
-//     const response: AxiosResponse<FileUploadResponse> = await axios.post(
-//       `${API_BASE_URL}/upload`, // Adjust endpoint for file upload
-//       formData,
-//       {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//           "x-api-key": apiKey,
-//         },
-//       }
-//     );
-//     console.log("File upload response in api.ts:", JSON.stringify(response,null,2));
-//     return response.data;
-//   } catch (error) {
-//     if (axios.isAxiosError(error)) {
-//       console.error("Error uploading file:", error.message);
-//     } else {
-//       console.error("Unknown error:", error);
-//     }
-//     throw error;
-//   }
-// };
 
