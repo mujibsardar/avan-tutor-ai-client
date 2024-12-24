@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { NewSessionResponse } from "../utils/api";
 
 interface SidePanelProps {
-  sessions: string[];
+  sessions: NewSessionResponse[];
   onNewSession: (sessionName: string) => void;
-  onSessionClick: (sessionName: string) => void;
+  onSessionClick: (session: NewSessionResponse) => void;
 }
 
 function SidePanel({ sessions, onNewSession, onSessionClick }: SidePanelProps) {
@@ -19,13 +20,6 @@ function SidePanel({ sessions, onNewSession, onSessionClick }: SidePanelProps) {
   return (
     <div className="side-panel">
       <h2>Tutoring Log</h2>
-      <ul>
-        {sessions.map((session) => (
-          <li key={session} onClick={() => onSessionClick(session)}>
-            {session}
-          </li>
-        ))}
-      </ul>
       <div className="new-session">
         <input
           type="text"
@@ -34,6 +28,16 @@ function SidePanel({ sessions, onNewSession, onSessionClick }: SidePanelProps) {
           placeholder="New session name"
         />
         <button onClick={handleNewSessionSubmit}>Start Session</button>
+      </div>
+      <div className="sessions-list">
+        <h3>Sessions</h3>
+        <ul>
+          {sessions.map((session) => (
+            <li key={session.sessionId} onClick={() => onSessionClick(session)}>
+              {session.sessionName}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

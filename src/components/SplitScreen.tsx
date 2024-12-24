@@ -1,60 +1,36 @@
 import { useState } from "react";
 import InputSection from "./InputSection";
 import OutputSection from "./OutputSection";
-import SidePanel from "./SidePanel.tsx";
-import BottomPanel from "./BottomPanel.tsx";
-import { getCurrentUser } from 'aws-amplify/auth';
-import { createNewSession } from "../utils/api"; 
+import SidePanel from "./SidePanel";
+import BottomPanel from "./BottomPanel";
+import { NewSessionResponse } from "../utils/api";
+interface SplitScreenProps {
+  sessions: NewSessionResponse[];
+  addSession: (newSession: string) => void;
+}
 
-function SplitScreen() {
+function SplitScreen({ sessions, addSession }: SplitScreenProps) {
   const [output, setOutput] = useState<string>("");
-  const [sessions, setSessions] = useState<string[]>([]); // Tracks session names
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [activeSession, setActiveSession] = useState<string | null>(null); // Current session
-
-  const getStudentId = async (): Promise<string> => {
-    try {
-      const { userId } = await getCurrentUser();
-      return userId; // This is the Cognito user ID
-    } catch (error) {
-      console.error("Error fetching current user:", error);
-      throw new Error("Unable to fetch student ID.");
-    }
-  };
+  const [activeSession, setActiveSession] = useState<string | null>(null);
 
   const handleAPIResponse = (response: string) => {
     setOutput(response);
   };
 
   const handleNewSession = async (sessionName: string) => {
-    
     try {
-      const studentId = await getStudentId();
-  
-      // Call the API to create or fetch a new session
-      const newSession = await createNewSession({ sessionName, studentId });
-  
-      console.log("Session data loaded successfully:", newSession);
-  
-      // Update state with the active session's name and its details (optional)
-      setActiveSession(newSession.sessionName);
-  
-      // Optionally, you can update other UI elements or load additional session data here
-      // For example, if you have session history, set it in state:
-      // setSessionHistory(newSession.history);
-  
-      // If the output should display something specific to the session:
-      setOutput(`Loaded session: ${newSession.sessionName}`);
+      await addSession(sessionName); // Update session list in App
+      setActiveSession(sessionName);
+      setOutput(`Started session: ${sessionName}`);
     } catch (error) {
-      console.error("Error handling session click:", error);
-      // Optionally display an error message to the user
+      console.error("Error creating session:", error);
     }
   };
 
-  const handleSessionClick = async (sessionName: string) => {
-    setActiveSession(sessionName);
+  const handleSessionClick = (session: NewSessionResponse) => {
+    setActiveSession(session.sessionName);
+    setOutput(`Loaded session: ${session.sessionName}`);
   };
-  
 
   return (
     <div className="split-screen">
@@ -64,8 +40,8 @@ function SplitScreen() {
         onSessionClick={handleSessionClick}
       />
       <div className="main-content">
-          <InputSection onSubmit={handleAPIResponse} />
-          <OutputSection output={output} />
+        <InputSection onSubmit={handleAPIResponse} />
+        <OutputSection output={output} />
       </div>
       <BottomPanel />
     </div>

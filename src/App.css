@@ -14,23 +14,9 @@
   margin-top: 0;
 }
 
-.side-panel ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.side-panel li {
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-  cursor: pointer;
-}
-
-.side-panel li:hover {
-  background-color: #ffe6a5; /* Highlight with light theme color */
-}
-
+/* Adjust the new session form with margin to create space below it */
 .new-session {
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .new-session input {
@@ -50,6 +36,32 @@
 .new-session button:hover {
   background-color: #650d88; /* Purple background */
   color: #ffb606; /* Yellow text */
+}
+
+/* Adjust spacing between the new session form and sessions list */
+.sessions-list {
+  margin-top: 20px;
+}
+
+.sessions-list h3 {
+  font-size: 18px;
+  color: #650d88; /* Accent color */
+  margin-bottom: 10px;
+}
+
+.side-panel ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.side-panel li {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.side-panel li:hover {
+  background-color: #ffe6a5; /* Highlight with light theme color */
 }
 
 /* Bottom Panel */
