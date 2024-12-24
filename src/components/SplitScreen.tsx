@@ -1,5 +1,4 @@
 import { useState } from "react";
-import InputSection from "./InputSection";
 import OutputSection from "./OutputSection";
 import SidePanel from "./SidePanel";
 import BottomPanel from "./BottomPanel";
@@ -15,10 +14,6 @@ interface SplitScreenProps {
 
 function SplitScreen({ sessions, activeSession, addSession, handleSessionSelect }: SplitScreenProps) {
   const [output, setOutput] = useState<string>("");
-
-  const handleAPIResponse = (response: string) => {
-    setOutput(response);
-  };
 
   const handleNewSession = async (sessionName: string) => {
     try {
@@ -39,7 +34,6 @@ function SplitScreen({ sessions, activeSession, addSession, handleSessionSelect 
 
       />
       <div className="main-content">
-        <InputSection onSubmit={handleAPIResponse} />
         <OutputSection output={output} />
       </div>
       <BottomPanel />
