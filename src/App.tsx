@@ -44,6 +44,11 @@ function App() {
     }
   };
 
+  const handleSessionSelect = (session: NewSessionResponse) => {
+    setActiveSession(session); // Set selected session as active
+  };
+
+
   return (
     <div className="App">
       <Header signOut={signOut} user={authUser} />
@@ -52,6 +57,7 @@ function App() {
           sessions={sessions}
           activeSession={activeSession} // Pass the entire session object
           addSession={addSession}
+          handleSessionSelect={handleSessionSelect} // Pass the function to SplitScreen
         />
       ) : (
         <div>

@@ -9,9 +9,11 @@ interface SplitScreenProps {
   sessions: NewSessionResponse[];
   activeSession: NewSessionResponse | null;
   addSession: (newSession: string) => void;
+  handleSessionSelect: (session: NewSessionResponse) => void; // Add the function to handle session selection
+
 }
 
-function SplitScreen({ sessions, activeSession, addSession }: SplitScreenProps) {
+function SplitScreen({ sessions, activeSession, addSession, handleSessionSelect }: SplitScreenProps) {
   const [output, setOutput] = useState<string>("");
 
   const handleAPIResponse = (response: string) => {
@@ -27,17 +29,14 @@ function SplitScreen({ sessions, activeSession, addSession }: SplitScreenProps) 
     }
   };
 
-  const handleSessionClick = (session: NewSessionResponse) => {
-    setOutput(`Loaded session: ${session.sessionName}`);
-  };
-
   return (
     <div className="split-screen">
       <SidePanel
         sessions={sessions}
         activeSession={activeSession} // Pass the active session here
         onNewSession={handleNewSession}
-        onSessionClick={handleSessionClick}
+        onSessionClick={handleSessionSelect} // Pass the handleSessionSelect function
+
       />
       <div className="main-content">
         <InputSection onSubmit={handleAPIResponse} />
