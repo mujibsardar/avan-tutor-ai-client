@@ -4,14 +4,15 @@ import OutputSection from "./OutputSection";
 import SidePanel from "./SidePanel";
 import BottomPanel from "./BottomPanel";
 import { NewSessionResponse } from "../utils/api";
+
 interface SplitScreenProps {
   sessions: NewSessionResponse[];
+  activeSession: NewSessionResponse | null;
   addSession: (newSession: string) => void;
 }
 
-function SplitScreen({ sessions, addSession }: SplitScreenProps) {
+function SplitScreen({ sessions, activeSession, addSession }: SplitScreenProps) {
   const [output, setOutput] = useState<string>("");
-  const [activeSession, setActiveSession] = useState<string | null>(null);
 
   const handleAPIResponse = (response: string) => {
     setOutput(response);
@@ -20,7 +21,6 @@ function SplitScreen({ sessions, addSession }: SplitScreenProps) {
   const handleNewSession = async (sessionName: string) => {
     try {
       await addSession(sessionName); // Update session list in App
-      setActiveSession(sessionName);
       setOutput(`Started session: ${sessionName}`);
     } catch (error) {
       console.error("Error creating session:", error);
@@ -28,7 +28,6 @@ function SplitScreen({ sessions, addSession }: SplitScreenProps) {
   };
 
   const handleSessionClick = (session: NewSessionResponse) => {
-    setActiveSession(session.sessionName);
     setOutput(`Loaded session: ${session.sessionName}`);
   };
 
@@ -36,6 +35,7 @@ function SplitScreen({ sessions, addSession }: SplitScreenProps) {
     <div className="split-screen">
       <SidePanel
         sessions={sessions}
+        activeSession={activeSession} // Pass the active session here
         onNewSession={handleNewSession}
         onSessionClick={handleSessionClick}
       />

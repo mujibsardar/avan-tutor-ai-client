@@ -12,6 +12,7 @@ type SessionsState = NewSessionResponse[]; // Just an array of session objects
 function App() {
   const { user, signOut } = useAuthenticator();
   const [sessions, setSessions] = useState<SessionsState>([]); // Manage sessions in App
+  const [activeSession, setActiveSession] = useState<NewSessionResponse | null>(null); // Store entire session object
 
   // Ensure TypeScript knows what 'user' looks like
   const authUser = user as AuthUser;
@@ -34,20 +35,24 @@ function App() {
   const addSession = async (sessionName: string) => {
     if (authUser) {
       try {
-        const newSession = await createNewSession({studentId: authUser.userId, sessionName}); // Make API call to create the session
+        const newSession = await createNewSession({ studentId: authUser.userId, sessionName });
         setSessions((prevSessions) => [...prevSessions, newSession]); // Add the session to the state
+        setActiveSession(newSession); // Set the new session as active
       } catch (error) {
         console.error("Error creating session:", error);
       }
     }
   };
 
-
   return (
     <div className="App">
       <Header signOut={signOut} user={authUser} />
       {authUser ? (
-        <SplitScreen sessions={sessions} addSession={addSession} />
+        <SplitScreen
+          sessions={sessions}
+          activeSession={activeSession} // Pass the entire session object
+          addSession={addSession}
+        />
       ) : (
         <div>
           <h1>Welcome to avantutor.ai</h1>
