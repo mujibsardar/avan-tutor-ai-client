@@ -14,15 +14,19 @@ interface NewSessionRequest {
   sessionName: string;
 }
 
-// Define the type for the new session response
 export interface NewSessionResponse {
   sessionId: string;
   studentId: string;
   sessionName: string;
-  uploadedFiles: any[]; // Adjust based on your schema
-  history: any[]; // Adjust based on your schema
-  createdAt: string;
+  uploadedFiles: unknown[]; // Or use unknown[] if structure isn't defined yet
+  history: {
+    message: string;
+    sender: "user" | "ai";
+    timestamp: string;
+  }[];
+  createdAt: string; // ISO timestamp for when the session was created
 }
+
 
 // Define the type for fetching sessions
 export interface FetchSessionsResponse {
