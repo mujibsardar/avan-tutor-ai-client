@@ -1,11 +1,20 @@
 import axios, { AxiosResponse } from "axios";
+import { parseHistory } from "./fromAPI/parseHistory"; // Import the parseHistory function
 
 const API_BASE_URL = "https://j41d2f5t31.execute-api.us-west-2.amazonaws.com/prod";
+
+
+export interface HistoryItem {
+  message: string;  // The content of the message.
+  sender: "user" | "ai";  // Indicates whether the message was sent by the user or the AI.
+  timestamp: string;  // The time the message was sent, typically in ISO 8601 format.
+}
 
 // Define the type for AI response data
 interface AIResponse {
   message: string;
-  aiGuidance: string; // Adjust to match your API response structure
+  aiGuidance: string;
+  updatedHistory: HistoryItem[];
 }
 
 // Define the type for the new session request payload
@@ -19,14 +28,9 @@ export interface NewSessionResponse {
   studentId: string;
   sessionName: string;
   uploadedFiles: unknown[]; // Or use unknown[] if structure isn't defined yet
-  history: {
-    message: string;
-    sender: "user" | "ai";
-    timestamp: string;
-  }[];
+  history: HistoryItem[];
   createdAt: string; // ISO timestamp for when the session was created
 }
-
 
 // Define the type for fetching sessions
 export interface FetchSessionsResponse {
@@ -65,11 +69,11 @@ export const createNewSession = async (
 };
 
 // Fetch AI response based on input text
-export const fetchAIResponse = async (inputText: string): Promise<AIResponse> => {
+export const fetchAIResponse = async (inputText: string, sessionId: string): Promise<AIResponse> => {
   try {
     const response: AxiosResponse<AIResponse> = await axios.post(
       `${API_BASE_URL}/airesponse`,
-      { input: inputText },
+      { input: inputText, sessionId },
       {
         headers: {
           "Content-Type": "application/json",
@@ -77,7 +81,11 @@ export const fetchAIResponse = async (inputText: string): Promise<AIResponse> =>
       }
     );
 
-    return response.data;
+    // Parse and return the response with formatted history
+    const aiResponse = response.data;
+    aiResponse.updatedHistory = parseHistory(aiResponse.updatedHistory); // Parse the history
+
+    return aiResponse;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("Error fetching AI response:", error.message);
@@ -101,8 +109,14 @@ export const fetchSessions = async (studentId: string): Promise<FetchSessionsRes
       }
     );
 
-    console.log("Sessions fetched successfully:", response.data);
-    return response.data;
+    // Parse and return sessions with formatted history
+    const sessions = response.data.sessions.map(session => ({
+      ...session,
+      history: parseHistory(session.history) // Parse the history for each session
+    }));
+
+    console.log("Sessions fetched successfully:", sessions);
+    return { sessions };
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("Error fetching sessions:", error.message);

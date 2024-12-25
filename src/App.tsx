@@ -48,14 +48,15 @@ function App() {
     setActiveSession(session); // Set selected session as active
   };
 
-
   return (
     <div className="App">
       <Header signOut={signOut} user={authUser} />
       {authUser ? (
         <SplitScreen
           sessions={sessions}
+          setSessions={setSessions} // Pass setSessions as a prop
           activeSession={activeSession} // Pass the entire session object
+          setActiveSession={setActiveSession} // Pass setActiveSession as a prop
           addSession={addSession}
           handleSessionSelect={handleSessionSelect} // Pass the function to SplitScreen
         />
