@@ -8,7 +8,7 @@ const formatTimestamp = (timestamp: string): string => {
 };
 
 // Component to display a single history item
-const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confidence, concerns }: HistoryItem) => {
+const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confidence, concerns, promptSummary }: HistoryItem) => { // Add promptSummary prop
   const formattedTime = formatTimestamp(timestamp);
   const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
 
@@ -80,6 +80,11 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
                   {feedback}
                 </div>
               )}
+              {promptSummary && ( // Conditionally render promptSummary
+              <span style={{ marginLeft: "10px", fontStyle: "italic" }}>
+                {promptSummary}
+              </span>
+            )}
             </div>
           </div>
         )}

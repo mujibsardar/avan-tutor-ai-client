@@ -10,8 +10,9 @@ export interface HistoryItem {
   timestamp: string;
   score?: number; // Make score optional
   feedback?: string; // Make feedback optional
-  confidence?: number;
-  concerns?: string[];
+  promptSummary?: string; 
+  confidence?: number; 
+  concerns?: string[]; 
 }
 
 // Define the type for AI response data
