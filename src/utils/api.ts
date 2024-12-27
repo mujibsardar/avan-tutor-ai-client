@@ -5,9 +5,13 @@ const API_BASE_URL = "https://j41d2f5t31.execute-api.us-west-2.amazonaws.com/pro
 
 
 export interface HistoryItem {
-  message: string;  // The content of the message.
-  sender: "user" | "ai";  // Indicates whether the message was sent by the user or the AI.
-  timestamp: string;  // The time the message was sent, typically in ISO 8601 format.
+  message: string;
+  sender: "user" | "ai" | "system"; // Add "system" for potential system messages
+  timestamp: string;
+  score?: number; // Make score optional
+  feedback?: string; // Make feedback optional
+  confidence?: number;
+  concerns?: string[];
 }
 
 // Define the type for AI response data

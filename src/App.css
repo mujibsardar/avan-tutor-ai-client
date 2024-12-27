@@ -1,6 +1,10 @@
 /* Updated Theme Colors */
 /* Primary: #ffb606, Accent: #650d88 */
 
+
+body {
+  margin: 0%;
+}
 /* Side Panel */
 .side-panel {
   width: 20%;
