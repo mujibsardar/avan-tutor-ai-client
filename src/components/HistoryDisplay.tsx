@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { HistoryItem } from "../utils/api";
 
 // Utility to format the timestamp
@@ -8,7 +8,7 @@ const formatTimestamp = (timestamp: string): string => {
 };
 
 // Component to display a single history item
-const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confidence, concerns, promptSummary }: HistoryItem) => { // Add promptSummary prop
+const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confidence, concerns, promptSummary, sessionId, index }: HistoryItem) => {
   const formattedTime = formatTimestamp(timestamp);
   const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
 
@@ -27,6 +27,7 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
 
   return (
     <div
+      id={`prompt-${sessionId}-${index}`}
       style={{
         marginBottom: "10px",
         padding: "5px",
@@ -151,14 +152,33 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
 // Component to display the entire history
 interface HistoryDisplayProps {
   history: HistoryItem[];
+  sessionId: string;
 }
 
-const HistoryDisplay = ({ history }: HistoryDisplayProps) => {
+const HistoryDisplay = ({ history, sessionId }: HistoryDisplayProps) => {
+  const historyDisplayRef = useRef<HTMLDivElement>(null); // Create a ref for the HistoryDisplay div
+
+  // Clear the hashtag from the URL when the component mounts
+  useEffect(() => {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Scroll to bottom when the component mounts or the history changes
+  useEffect(() => {
+    if (historyDisplayRef.current) {
+      historyDisplayRef.current.scrollTop = historyDisplayRef.current.scrollHeight;
+    }
+  }, [history]); // Run this effect whenever the history changes
+
   return (
-    <div className="history-display">
-      {history.map((item, index) => (
-        <HistoryItemDisplay key={index} {...item} />
-      ))}
+    <div className="history-display" ref={historyDisplayRef}>
+      {history.map((item, index) => {
+        console.log(`sessionId: ${sessionId}, index: ${index}`);
+        return (
+          <HistoryItemDisplay key={index} {...item} sessionId={sessionId} index={index} />
+        )
+      }
+      )}
     </div>
   );
 };

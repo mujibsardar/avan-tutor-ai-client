@@ -93,7 +93,7 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
       />
       <div className="main-content">
         {activeSession && activeSession.history && activeSession.history.length > 0 ? (
-          <HistoryDisplay history={activeSession.history} />
+          <HistoryDisplay history={activeSession.history} sessionId={activeSession.sessionId} />
         ) : output && (
           <div className="output-section">
             <p>{output}</p>

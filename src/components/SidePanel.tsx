@@ -26,6 +26,16 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick }: Si
     }
   };
 
+  const handlePromptSummaryClick = (session: NewSessionResponse, index: number) => {
+    onSessionClick(session); // Switch to the correct session first
+    setTimeout(() => {
+      const element = document.getElementById(`prompt-${session.sessionId}-${index}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100); // Adjust timeout as needed
+  };
+
   return (
     <div className="side-panel">
       <h2>Tutoring Log</h2>
@@ -41,16 +51,40 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick }: Si
       <div className="sessions-list">
         <h3>Sessions</h3>
         <ul>
-        {sessions.map((session) => (
-            <li
-              key={session.sessionId}
-              onClick={() => onSessionClick(session)}
-              style={{
-                backgroundColor: activeSession?.sessionId === session.sessionId ? "#ffe6a5" : "transparent",
-                cursor: "pointer", // Add pointer cursor for clickable sessions
-              }}
-            >
-              {session.sessionName}
+          {sessions.map((session) => (
+            <li key={session.sessionId}> {/* Removed inline style from li */}
+              <div 
+                onClick={() => onSessionClick(session)} 
+                style={{ 
+                  marginBottom: "5px",
+                  cursor: "pointer", // Added cursor pointer to session name
+                  backgroundColor: activeSession?.sessionId === session.sessionId ? "#ffe6a5" : "transparent", // Re-add highlighting
+                }}
+              > 
+                {session.sessionName}
+              </div>
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                {session.history.map((item, index) => (
+                  item.sender === "user" && item.promptSummary && (
+                    <li key={index} style={{ marginLeft: "15px", cursor: "pointer" }}> {/* Added cursor pointer to li */}
+                       <a
+                        href={`#prompt-${session.sessionId}-${index}`}
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent default link behavior
+                          handlePromptSummaryClick(session, index); // Call the new handler
+                        }}
+                        style={{
+                          color: "gray",
+                          textDecoration: "none",
+                          fontSize: "0.9em",
+                        }}
+                      >
+                        - {item.promptSummary.length > 30 ? item.promptSummary.substring(0, 30) + "..." : item.promptSummary}
+                      </a>
+                    </li>
+                  )
+                ))}
+              </ul>
             </li>
           ))}
         </ul>

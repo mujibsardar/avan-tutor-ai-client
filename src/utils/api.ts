@@ -13,6 +13,8 @@ export interface HistoryItem {
   promptSummary?: string; 
   confidence?: number; 
   concerns?: string[]; 
+  sessionId?: string;
+  index?: number;
 }
 
 // Define the type for AI response data
