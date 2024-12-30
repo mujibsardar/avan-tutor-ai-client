@@ -28,6 +28,11 @@ body {
   overflow-y: auto; /* Enable vertical scrolling for content overflow */
   max-height: calc(100vh - 150px); /* Adjust to account for other fixed elements like headers */
   padding: 10px; /* Optional: Add padding for better appearance */
+  overflow-x: hidden; /* Hide horizontal overflow for the main-content */
+}
+
+.history-item {
+  overflow-x: auto;
 }
 
 .new-session input {
@@ -71,8 +76,18 @@ body {
   cursor: pointer;
 }
 
-.side-panel li:hover {
-  background-color: #ffe6a5; /* Highlight with light theme color */
+.side-panel li:hover,
+.side-panel li a:hover {
+  background-color: #ffe6a5; /* Hover color */
+}
+
+.side-panel ul > li.active { /* Style for active session */
+  background-color: #ffe499; /* Slightly different active color */
+}
+
+/* Prevent hover effect on li elements with children */
+.side-panel li:has(li):hover { 
+  background-color: transparent; /* Or your default background color */
 }
 
 /* Bottom Panel */
@@ -221,11 +236,15 @@ body {
 }
 
 .main-content {
+  width: 80%;
   display: flex;
   flex: 1;
   gap: 20px;
   padding: 20px;
   box-sizing: border-box;
+  font-family: 'Arial', sans-serif; /* Change the font family */
+  font-size: 16px; /* Increase the default font size */ 
+  overflow-x: hidden; /* Hide horizontal overflow for the main-content */
 }
 
 /* Input & Output Section Styling */

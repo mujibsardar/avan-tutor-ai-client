@@ -52,14 +52,14 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick }: Si
         <h3>Sessions</h3>
         <ul>
           {sessions.map((session) => (
-            <li key={session.sessionId}> {/* Removed inline style from li */}
+            <li key={session.sessionId}
+              style={{ 
+                marginBottom: "5px",
+              }} 
+              className={activeSession?.sessionId === session.sessionId ? "active" : ""} // Add active class
+              >
               <div 
                 onClick={() => onSessionClick(session)} 
-                style={{ 
-                  marginBottom: "5px",
-                  cursor: "pointer", // Added cursor pointer to session name
-                  backgroundColor: activeSession?.sessionId === session.sessionId ? "#ffe6a5" : "transparent", // Re-add highlighting
-                }}
               > 
                 {session.sessionName}
               </div>

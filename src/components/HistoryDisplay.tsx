@@ -1,5 +1,79 @@
 import { useState, useEffect, useRef } from "react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm'; // Import the plugin
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Choose a theme
 import { HistoryItem } from "../utils/api";
+
+// Interface for CodeBlock props
+interface CodeBlockProps {
+  language: string;
+  value: string;
+}
+const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
+  const [isHovered, setIsHovered] = useState(false); // Add hover state
+  const [buttonText, setButtonText] = useState("Copy"); // Add state for button text
+
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setButtonText("Copied!"); // Change button text on success
+        setTimeout(() => {
+          setButtonText("Copy"); // Reset button text after a delay
+        }, 2000); // Adjust delay as needed
+      })
+      .catch(err => {
+        console.error("Failed to copy: ", err);
+      });
+  };
+  
+
+  return (
+    <div style={{ position: "relative" }}> {/* Wrap SyntaxHighlighter with a div */}
+      <SyntaxHighlighter style={dracula} language={language} PreTag="div">
+        {value}
+      </SyntaxHighlighter>
+      <div
+        style={{
+          position: "absolute",
+          top: "45px",
+          right: "30px",
+          cursor: "pointer",
+          fontSize: "1.2em",
+          color: "white",
+          transition: "transform 0.2s ease", // Add transition for smooth animation
+          transform: isHovered ? "scale(1.1)" : "scale(1)", // Scale on hover
+        }}
+        onClick={() => handleCopyToClipboard(value)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-clipboard" viewBox="0 0 16 16">
+          <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+          <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+        </svg>
+        {isHovered && ( // Show tooltip on hover
+          <div 
+            style={{ 
+              position: "absolute", 
+              top: "-140%", 
+              left: "80%", 
+              transform: "translateX(-70%)", 
+              backgroundColor: "rgba(0, 0, 0, 0.8)", 
+              color: "white", 
+              padding: "3px 8px", 
+              borderRadius: "4px", 
+              fontSize: "0.8em", 
+              whiteSpace: "nowrap" 
+            }}
+          >
+            {buttonText} {/* Display buttonText in the tooltip */}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // Utility to format the timestamp
 const formatTimestamp = (timestamp: string): string => {
@@ -25,8 +99,10 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
     (confidence ?? 0) >= 70 ? "#ffc107" : // Yellow for moderate confidence
     "#dc3545"; // Red for low confidence
 
+
   return (
     <div
+      className="history-item"
       id={`prompt-${sessionId}-${index}`}
       style={{
         marginBottom: "10px",
@@ -135,15 +211,31 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
       <pre
         style={{
           marginTop: "5px",
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-word",
+          whiteSpace: "pre-wrap", // This ensures long words wrap
+          wordBreak: "break-word", 
           backgroundColor: "#f4f4f4",
           padding: "10px",
           borderRadius: "5px",
           fontFamily: "monospace",
         }}
       >
-        {message}
+         <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({ className, children, ...props }) { // Remove node and inline from arguments
+                const match = /language-(\w+)/.exec(className || '');
+                return match ? (
+                  <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
+                ) : (
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                );
+              }
+            }}
+          >
+            {message}
+        </ReactMarkdown>
       </pre>
     </div>
   );
@@ -173,7 +265,6 @@ const HistoryDisplay = ({ history, sessionId }: HistoryDisplayProps) => {
   return (
     <div className="history-display" ref={historyDisplayRef}>
       {history.map((item, index) => {
-        console.log(`sessionId: ${sessionId}, index: ${index}`);
         return (
           <HistoryItemDisplay key={index} {...item} sessionId={sessionId} index={index} />
         )

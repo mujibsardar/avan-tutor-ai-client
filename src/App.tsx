@@ -49,7 +49,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="App"> {/* Attach the ref to the App div */}
       <Header signOut={signOut} user={authUser} />
       {authUser ? (
         <SplitScreen
