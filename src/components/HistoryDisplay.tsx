@@ -254,8 +254,8 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
           <span 
             style={{
               position: "absolute",
-              bottom: "5px", // Position it slightly above the bottom
-              left: "10px",
+              bottom: "0px", // Position it slightly above the bottom
+              left: "80%",
               fontSize: "0.8em",
               cursor: "pointer",
               backgroundColor: "rgba(255, 255, 255, 0.8)", // Add a semi-transparent background

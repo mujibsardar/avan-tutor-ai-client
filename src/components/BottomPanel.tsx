@@ -9,6 +9,7 @@ function BottomPanel({ onSend }: BottomPanelProps) {
   const [chatInput, setChatInput] = useState<string>("");
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [dragActive, setDragActive] = useState<boolean>(false);
+  const [fileName, setFileName] = useState<string | null>(null); // Add state for file name
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setChatInput(e.target.value);
@@ -18,6 +19,7 @@ function BottomPanel({ onSend }: BottomPanelProps) {
     if (chatInput.trim() && !isLocked) {
       setIsLocked(true);
       onSend(chatInput);
+      setFileName(null); // Clear file name after sending
       setChatInput(""); // Clear input after sending
       setIsLocked(false);
     }
@@ -46,9 +48,9 @@ function BottomPanel({ onSend }: BottomPanelProps) {
     if (e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       try {
-        // Extract the content of the file (could be PDF, DOCX, TXT, etc.)
         const content = await readTextFile(file);
-        setChatInput(content); // Set the extracted content into chat input
+        setChatInput(content);
+        setFileName(file.name); // Store the file name in state
       } catch (error) {
         console.error("Error reading file:", error);
       }
@@ -62,13 +64,33 @@ function BottomPanel({ onSend }: BottomPanelProps) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <textarea
-        value={chatInput}
-        onChange={handleTextChange}
-        onKeyDown={handleKeyPress} // Listen for the Enter key
-        placeholder="Type a message or drag a file here (PDF, DOCX, TXT)"
-        disabled={isLocked}
-      />
+      <div style={{ 
+        border: "1px solid #ccc", 
+        padding: "10px", 
+        borderRadius: "5px",
+      }}> 
+        {fileName && ( // Conditionally render the file name
+          <div style={{ 
+            fontWeight: "bold", 
+            marginBottom: "5px" 
+          }}>
+            {fileName}
+          </div>
+        )}
+        <textarea
+          value={chatInput}
+          onChange={handleTextChange}
+          onKeyDown={handleKeyPress} 
+          placeholder="Type a message, drag a document file (PDF, DOCX, TXT) or code file to upload"
+          disabled={isLocked}
+          style={{ 
+            border: "none", 
+            resize: "none", 
+            padding: 0,
+            width: "100%"
+          }}
+        />
+      </div>
       <div className="actions">
         <button onClick={handleSend} disabled={isLocked}>
           Send
