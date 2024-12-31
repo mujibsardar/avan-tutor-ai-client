@@ -135,9 +135,9 @@ export const fetchSessions = async (studentId: string): Promise<FetchSessionsRes
 };
 
 // Delete a session by sessionId
-export const deleteSession = async (sessionId: string): Promise<void> => {
+export const deleteSession = async (sessionId: string, userId: string): Promise<void> => {
   try {
-    await axios.delete(`${API_BASE_URL}/sessions/${sessionId}`, {
+    await axios.delete(`${API_BASE_URL}/sessions/${sessionId}/${userId}`, {
       headers: {
         "Content-Type": "application/json",
       },

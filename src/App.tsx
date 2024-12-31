@@ -59,6 +59,7 @@ function App() {
           setActiveSession={setActiveSession} // Pass setActiveSession as a prop
           addSession={addSession}
           handleSessionSelect={handleSessionSelect} // Pass the function to SplitScreen
+          userId={authUser.userId} // Pass the userId to SplitScreen
         />
       ) : (
         <div>

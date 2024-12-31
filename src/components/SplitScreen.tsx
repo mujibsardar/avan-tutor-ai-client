@@ -13,9 +13,10 @@ interface SplitScreenProps {
   setActiveSession: (session: NewSessionResponse | null) => void; // Add setActiveSession prop
   addSession: (newSession: string) => void;
   handleSessionSelect: (session: NewSessionResponse) => void;
+  userId: string;
 }
 
-function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, addSession, handleSessionSelect }: SplitScreenProps) {
+function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, addSession, handleSessionSelect, userId}: SplitScreenProps) {
   const [output, setOutput] = useState<string>("");
 
   const handleNewSession = async (sessionName: string) => {
@@ -73,7 +74,7 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
 
   const handleDeleteSession = async (sessionId: string) => {
     try {
-      await deleteSession(sessionId);
+      await deleteSession(sessionId, userId);
       setOutput(`Deleted session`);
     } catch (error) {
       console.error("Error deleting session:", error);
