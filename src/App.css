@@ -12,6 +12,7 @@ body {
   border-right: 1px solid #ccc;
   padding: 10px;
   box-sizing: border-box;
+  margin-bottom: 60px;
 }
 
 .side-panel h2 {

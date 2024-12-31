@@ -85,6 +85,7 @@ const formatTimestamp = (timestamp: string): string => {
 const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confidence, concerns, promptSummary, sessionId, index }: HistoryItem) => {
   const formattedTime = formatTimestamp(timestamp);
   const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   // Determine score color based on score value
   const scoreColor =
@@ -100,7 +101,15 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
     "#dc3545"; // Red for low confidence
 
 
-  return (
+
+   // Calculate the number of lines to show when minimized
+   const maxLines = 5; 
+   const lineHeight = 20; // Adjust this value based on your line-height style
+   const maxHeight = maxLines * lineHeight;
+
+
+
+   return (
     <div
       className="history-item"
       id={`prompt-${sessionId}-${index}`}
@@ -147,21 +156,21 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
                     left: "0",
                     backgroundColor: "white",
                     border: "1px solid #ccc",
-                    padding: "15px", // Increased padding for better spacing
+                    padding: "15px",
                     borderRadius: "5px",
                     zIndex: 10,
-                    width: "300px", // Adjusted width for better readability
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Added shadow for a more polished look
+                    width: "300px",
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
                   }}
                 >
                   {feedback}
                 </div>
               )}
-              {promptSummary && ( // Conditionally render promptSummary
-              <span style={{ marginLeft: "10px", fontStyle: "italic" }}>
-                {promptSummary}
-              </span>
-            )}
+              {promptSummary && (
+                <span style={{ marginLeft: "10px", fontStyle: "italic" }}>
+                  {promptSummary}
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -194,11 +203,11 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
                     left: "0",
                     backgroundColor: "white",
                     border: "1px solid #ccc",
-                    padding: "15px", // Increased padding for better spacing
+                    padding: "15px",
                     borderRadius: "5px",
                     zIndex: 10,
-                    width: "300px", // Adjusted width for better readability
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Added shadow for a more polished look
+                    width: "300px",
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
                   }}
                 >
                   {concerns}
@@ -208,35 +217,67 @@ const HistoryItemDisplay = ({ message, sender, timestamp, score, feedback, confi
           </div>
         )}
       </div>
-      <pre
+      <div // Added a wrapping div for the message content
         style={{
           marginTop: "5px",
-          whiteSpace: "pre-wrap", // This ensures long words wrap
-          wordBreak: "break-word", 
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
           backgroundColor: "#f4f4f4",
           padding: "10px",
           borderRadius: "5px",
           fontFamily: "monospace",
+          maxHeight: sender === "user" && !expanded ? `${maxHeight}px` : "none",
+          overflow: sender === "user" && !expanded ? "hidden" : "visible",
+          position: "relative", // Add position relative to contain the ellipsis
         }}
       >
-         <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              code({ className, children, ...props }) { // Remove node and inline from arguments
-                const match = /language-(\w+)/.exec(className || '');
-                return match ? (
-                  <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
-                ) : (
-                  <code className={className} {...props}>
-                    {children}
-                  </code>
-                );
-              }
-            }}
-          >
-            {message}
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            code({ className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || '');
+              return match ? (
+                <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
+              ) : (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            }
+          }}
+        >
+          {message}
         </ReactMarkdown>
-      </pre>
+  
+        {/* Conditionally render the ellipsis for truncated user messages */}
+        {!expanded && sender === "user" && message.split("\n").length > maxLines && (
+          <span 
+            style={{
+              position: "absolute",
+              bottom: "5px", // Position it slightly above the bottom
+              left: "10px",
+              fontSize: "0.8em",
+              cursor: "pointer",
+              backgroundColor: "rgba(255, 255, 255, 0.8)", // Add a semi-transparent background
+              padding: "3px 8px",
+              borderRadius: "4px",
+            }}
+            onClick={() => setExpanded(!expanded)}
+          >
+            ... See More
+          </span>
+        )}
+      </div>
+  
+      {/* Conditionally render the "Show Less" button for expanded user messages */}
+      {expanded && sender === "user" && message.split("\n").length > maxLines && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{ marginTop: "5px", fontSize: "0.8em", padding: "3px 8px", borderRadius: "4px" }}
+        >
+          Show Less
+        </button>
+      )}
     </div>
   );
 };
@@ -260,7 +301,7 @@ const HistoryDisplay = ({ history, sessionId }: HistoryDisplayProps) => {
     if (historyDisplayRef.current) {
       historyDisplayRef.current.scrollTop = historyDisplayRef.current.scrollHeight;
     }
-  }, [history]); // Run this effect whenever the history changes
+  }, [history]); // Run this effect whenever the history changes 
 
   return (
     <div className="history-display" ref={historyDisplayRef}>
