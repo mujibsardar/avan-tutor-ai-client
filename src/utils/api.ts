@@ -133,3 +133,23 @@ export const fetchSessions = async (studentId: string): Promise<FetchSessionsRes
     throw error;
   }
 };
+
+// Delete a session by sessionId
+export const deleteSession = async (sessionId: string): Promise<void> => {
+  try {
+    await axios.delete(`${API_BASE_URL}/sessions/${sessionId}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("Session deleted successfully:", sessionId);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Error deleting session:", error.message);
+    } else {
+      console.error("Unknown error:", error);
+    }
+    throw error;
+  }
+};

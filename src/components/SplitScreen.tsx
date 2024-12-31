@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import SidePanel from "./SidePanel";
 import BottomPanel from "./BottomPanel";
 import { NewSessionResponse } from "../utils/api";
-import { fetchAIResponse } from "../utils/api";
+import { fetchAIResponse, deleteSession } from "../utils/api";
 import { formatHistory } from "../utils/formatHistory";
 import HistoryDisplay from "./HistoryDisplay";
 
@@ -71,6 +71,15 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
     }
   };
 
+  const handleDeleteSession = async (sessionId: string) => {
+    try {
+      await deleteSession(sessionId);
+      setOutput(`Deleted session`);
+    } catch (error) {
+      console.error("Error deleting session:", error);
+    }
+  };
+
   useEffect(() => {
     if (!activeSession) {
       setOutput("No session selected. Please select or start a session.");
@@ -90,6 +99,7 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
         activeSession={activeSession}
         onNewSession={handleNewSession}
         onSessionClick={handleSessionSelect}
+        onDeleteSession={handleDeleteSession}
       />
       <div className="main-content">
         {activeSession && activeSession.history && activeSession.history.length > 0 ? (

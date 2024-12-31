@@ -68,11 +68,12 @@ function BottomPanel({ onSend }: BottomPanelProps) {
         border: "1px solid #ccc", 
         padding: "10px", 
         borderRadius: "5px",
+        width: "100%",
       }}> 
         {fileName && ( // Conditionally render the file name
           <div style={{ 
             fontWeight: "bold", 
-            marginBottom: "5px" 
+            marginBottom: "5px", 
           }}>
             {fileName}
           </div>
@@ -91,7 +92,7 @@ function BottomPanel({ onSend }: BottomPanelProps) {
           }}
         />
       </div>
-      <div className="actions">
+      <div className="actions" style={{ display: "flex", alignItems: "center" }}>
         <button onClick={handleSend} disabled={isLocked}>
           Send
         </button>

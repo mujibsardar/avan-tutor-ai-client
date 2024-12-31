@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { NewSessionResponse } from "../utils/api";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 interface SidePanelProps {
   sessions: NewSessionResponse[];
   activeSession: NewSessionResponse | null;
   onNewSession: (sessionName: string) => void;
   onSessionClick: (session: NewSessionResponse) => void;
+  onDeleteSession: (sessionId: string) => void; // Add onDeleteSession prop
 }
 
-function SidePanel({ sessions, activeSession, onNewSession, onSessionClick }: SidePanelProps) {
+function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDeleteSession }: SidePanelProps) {
   const [newSessionName, setNewSessionName] = useState<string>("");
   const [isMinimized, setIsMinimized] = useState(false); // State to track minimized state
   const [showPromptSummaries, setShowPromptSummaries] = useState<{ [sessionId: string]: boolean }>({}); // State for toggling prompt summaries per session
@@ -45,24 +48,20 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick }: Si
         style={{
           position: "absolute",
           top: "50%",
-          right: isMinimized ? "96%" : "79%",
+          right: isMinimized ? "95.5%" : "78.5%",
           transform: "translateY(-50%)",
           backgroundColor: "#f9f9f9",
           border: "1px solid #ccc",
           borderRadius: "50%",
-          padding: "8px",
+          padding: "15px",
           cursor: "pointer",
         }}
       >
-        {isMinimized ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
-          </svg>
+        {isMinimized ? ( 
+          <FontAwesomeIcon icon={faChevronRight} /> 
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path fillRule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
-          </svg>
-        )}
+          <FontAwesomeIcon icon={faChevronLeft} />
+         )}
       </div>
       {!isMinimized && (
         <>
@@ -86,8 +85,29 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick }: Si
                   }}
                   className={activeSession?.sessionId === session.sessionId ? "active" : ""}
                 >
-                  <div onClick={() => onSessionClick(session)}>
+                  <div 
+                    onClick={() => onSessionClick(session)} 
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }} // Add space-between
+                 > 
                     {session.sessionName}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation(); // Stop the click event from propagating to the parent
+                        if (window.confirm("Are you sure you want to delete this session?")) {
+                          onDeleteSession(session.sessionId);
+                        }
+                      }} 
+                      style={{ 
+                        marginLeft: "5px", 
+                        padding: "5px", 
+                        border: "none", // Add this line
+                        color: "grey", // Add this line
+                        cursor: "pointer",
+                        backgroundColor: "transparent", // Add this line
+                      }}
+                    >
+                       <FontAwesomeIcon icon={faTrash} /> 
+                    </button>
                   </div>
                   {session.history.some(item => item.sender === "user" && item.promptSummary) && (
                     <>
