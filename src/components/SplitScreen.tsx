@@ -74,12 +74,33 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
 
   const handleDeleteSession = async (sessionId: string) => {
     try {
+      // Call the API to delete the session
       await deleteSession(sessionId, userId);
+
       setOutput(`Deleted session`);
+      
+      // Wait for a few seconds before refreshing the session list
+      setTimeout(() => {
+        // Remove the deleted session from the sessions array
+        const updatedSessions = sessions.filter(session => session.sessionId !== sessionId);
+        
+        // Update the sessions state to reflect the deletion
+        setSessions(updatedSessions);
+
+        // Optionally clear the active session if it was the one deleted
+        if (activeSession?.sessionId === sessionId) {
+          setActiveSession(null);
+        }
+
+        // Clear the output message after the refresh
+        setOutput("");
+      }, 2000); // Delay of 2000ms (2 seconds)
     } catch (error) {
       console.error("Error deleting session:", error);
+      setOutput("Error deleting session.");
     }
   };
+  
 
   useEffect(() => {
     if (!activeSession) {
