@@ -3,16 +3,15 @@ import { parseHistory } from "./fromAPI/parseHistory"; // Import the parseHistor
 
 const API_BASE_URL = "https://j41d2f5t31.execute-api.us-west-2.amazonaws.com/prod";
 
-
 export interface HistoryItem {
   message: string;
-  sender: "user" | "ai" | "system"; // Add "system" for potential system messages
+  sender: "user" | "openai" | "gemini";
   timestamp: string;
-  score?: number; // Make score optional
-  feedback?: string; // Make feedback optional
-  promptSummary?: string; 
-  confidence?: number; 
-  concerns?: string[]; 
+  score?: number;
+  feedback?: string;
+  promptSummary?: string;
+  confidence?: number;
+  concerns?: string;
   sessionId?: string;
   index?: number;
 }
@@ -20,7 +19,26 @@ export interface HistoryItem {
 // Define the type for AI response data
 interface AIResponse {
   message: string;
-  aiGuidance: string;
+  aiResults: {
+      prompt: {
+          score: number | null;
+          feedback: string | null;
+          promptSummary: string | null;
+      }
+    openai: {
+      aiGuidance: string | null;
+      confidence: number | null;
+      concerns: string | null;
+    };
+    gemini: {
+      aiGuidance: string | null;
+      confidence: number | null;
+      concerns: string | null;
+    };
+    search: {
+      results: string[];
+    };
+  };
   updatedHistory: HistoryItem[];
 }
 
@@ -34,14 +52,14 @@ export interface NewSessionResponse {
   sessionId: string;
   studentId: string;
   sessionName: string;
-  uploadedFiles: unknown[]; // Or use unknown[] if structure isn't defined yet
+  uploadedFiles: unknown[];
   history: HistoryItem[];
-  createdAt: string; // ISO timestamp for when the session was created
+  createdAt: string;
 }
 
 // Define the type for fetching sessions
 export interface FetchSessionsResponse {
-  sessions: NewSessionResponse[]; // Array of session data
+  sessions: NewSessionResponse[];
 }
 
 // Create a new session
@@ -76,7 +94,10 @@ export const createNewSession = async (
 };
 
 // Fetch AI response based on input text
-export const fetchAIResponse = async (inputText: string, sessionId: string): Promise<AIResponse> => {
+export const fetchAIResponse = async (
+  inputText: string,
+  sessionId: string
+): Promise<AIResponse> => {
   try {
     const response: AxiosResponse<AIResponse> = await axios.post(
       `${API_BASE_URL}/airesponse`,
@@ -87,11 +108,10 @@ export const fetchAIResponse = async (inputText: string, sessionId: string): Pro
         },
       }
     );
+    console.log("Raw AI Response:", response.data);
 
-    // Parse and return the response with formatted history
     const aiResponse = response.data;
-    aiResponse.updatedHistory = parseHistory(aiResponse.updatedHistory); // Parse the history
-
+    aiResponse.updatedHistory = parseHistory(aiResponse.updatedHistory);
     return aiResponse;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -104,7 +124,9 @@ export const fetchAIResponse = async (inputText: string, sessionId: string): Pro
 };
 
 // Fetch all sessions for a specific user by studentId
-export const fetchSessions = async (studentId: string): Promise<FetchSessionsResponse> => {
+export const fetchSessions = async (
+  studentId: string
+): Promise<FetchSessionsResponse> => {
   try {
     const response: AxiosResponse<FetchSessionsResponse> = await axios.get(
       `${API_BASE_URL}/sessions`,
@@ -117,9 +139,9 @@ export const fetchSessions = async (studentId: string): Promise<FetchSessionsRes
     );
 
     // Parse and return sessions with formatted history
-    const sessions = response.data.sessions.map(session => ({
+    const sessions = response.data.sessions.map((session) => ({
       ...session,
-      history: parseHistory(session.history) // Parse the history for each session
+      history: parseHistory(session.history),
     }));
 
     console.log("Sessions fetched successfully:", sessions);
@@ -135,7 +157,10 @@ export const fetchSessions = async (studentId: string): Promise<FetchSessionsRes
 };
 
 // Delete a session by sessionId
-export const deleteSession = async (sessionId: string, userId: string): Promise<void> => {
+export const deleteSession = async (
+  sessionId: string,
+  userId: string
+): Promise<void> => {
   try {
     await axios.delete(`${API_BASE_URL}/sessions/${sessionId}/${userId}`, {
       headers: {
