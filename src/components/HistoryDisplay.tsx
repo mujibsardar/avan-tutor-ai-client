@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { HistoryItem } from "../utils/api";
+import { transformHistory, TransformedHistoryItem } from "../utils/fromAPI/transformHistory";
 
 
 // Interface for CodeBlock props
@@ -76,7 +77,6 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
     );
 };
 
-
 // Utility to format the timestamp
 const formatTimestamp = (timestamp: string): string => {
   const date = new Date(timestamp);
@@ -84,7 +84,7 @@ const formatTimestamp = (timestamp: string): string => {
 };
 
 // Component to display a single history item
-const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: number }> = ({ message, sender, timestamp, score, feedback, confidence, concerns, promptSummary, sessionId, index }) => {
+const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: number }> = ({ message, sender, timestamp, score, feedback, confidence, concerns, promptSummary}) => {
     const formattedTime = formatTimestamp(timestamp);
     const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
     const [expanded, setExpanded] = useState(false);
@@ -111,7 +111,6 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
     return (
         <div
             className="history-item"
-            id={`prompt-${sessionId}-${index}`}
             style={{
                 marginBottom: "10px",
                 padding: "5px",
@@ -278,6 +277,31 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
         </div>
     );
 };
+
+const HistoryBundleDisplay: React.FC< TransformedHistoryItem & { sessionId: string; index: number } > = ({ prompt, responses, sessionId, index }) => {
+    return (
+        <div className="history-bundle" id={`prompt-${sessionId}-${index}`}>
+            <HistoryItemDisplay {...prompt} sessionId={sessionId} index={index} />
+            {responses.openai && <HistoryItemDisplay {...responses.openai} sessionId={sessionId} index={index} />}
+            {responses.gemini && <HistoryItemDisplay {...responses.gemini} sessionId={sessionId} index={index} />}
+            {responses.search && (
+                <div style={{ marginTop: "10px" }}>
+                    <strong>Search Results:</strong>
+                    <ul style={{ listStyleType: "none", padding: 0 }}>
+                        {responses.search.map((result, index) => (
+                            <li key={index}>
+                                <a href={result} target="_blank" rel="noreferrer">
+                                    {result}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+}
+
 interface AIResults {
     prompt: {
         score: number | null;
@@ -305,9 +329,8 @@ interface HistoryDisplayProps {
     aiResults?: AIResults;
 }
 
-const HistoryDisplay: React.FC<HistoryDisplayProps> = ({ history, sessionId, aiResults }) => {
+const HistoryDisplay: React.FC<HistoryDisplayProps> = ({ history, sessionId }) => {
     const historyDisplayRef = useRef<HTMLDivElement>(null);
-    const [activeTab, setActiveTab] = useState("openai");
 
     useEffect(() => {
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -319,146 +342,14 @@ const HistoryDisplay: React.FC<HistoryDisplayProps> = ({ history, sessionId, aiR
         }
     }, [history]);
 
-    const handleTabClick = (tab: string) => {
-        setActiveTab(tab);
-    };
-
+    const transformedHistory = transformHistory(history);
 
     return (
         <div className="history-display" ref={historyDisplayRef}>
-            {history.map((item, index) => (
-                <HistoryItemDisplay key={index} {...item} sessionId={sessionId} index={index} />
-            ))}
-            {aiResults && (
-              <div style={{ marginTop: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'flex-start', borderBottom: '2px solid #ccc' }}>
-                    <button
-                        style={{
-                            padding: '10px 15px',
-                            border: 'none',
-                            borderBottom: activeTab === 'openai' ? '2px solid #007bff' : 'none',
-                            cursor: 'pointer',
-                            backgroundColor: activeTab === 'openai' ? 'white' : '#f0f0f0',
-                            fontWeight: activeTab === 'openai' ? 'bold' : 'normal'
-                        }}
-                        onClick={() => handleTabClick('openai')}
-                    >
-                        OpenAI
-                    </button>
-                    <button
-                        style={{
-                            padding: '10px 15px',
-                            border: 'none',
-                            borderBottom: activeTab === 'gemini' ? '2px solid #007bff' : 'none',
-                            cursor: 'pointer',
-                            backgroundColor: activeTab === 'gemini' ? 'white' : '#f0f0f0',
-                            fontWeight: activeTab === 'gemini' ? 'bold' : 'normal'
-                        }}
-                        onClick={() => handleTabClick('gemini')}
-                    >
-                        Gemini
-                    </button>
-                    <button
-                        style={{
-                            padding: '10px 15px',
-                            border: 'none',
-                            borderBottom: activeTab === 'search' ? '2px solid #007bff' : 'none',
-                            cursor: 'pointer',
-                            backgroundColor: activeTab === 'search' ? 'white' : '#f0f0f0',
-                            fontWeight: activeTab === 'search' ? 'bold' : 'normal'
-                        }}
-                        onClick={() => handleTabClick('search')}
-                    >
-                        Search Results
-                    </button>
-                </div>
-
-                <div style={{ padding: '15px', backgroundColor: '#fff', border: '1px solid #ccc' }}>
-                    {activeTab === 'openai' && (
-                          <>
-                             <h4>AI Guidance (OpenAI)</h4>
-                             <ReactMarkdown
-                                 remarkPlugins={[remarkGfm]}
-                                 components={{
-                                     code({ className, children, ...props }) {
-                                         const match = /language-(\w+)/.exec(className || '');
-                                         return match ? (
-                                             <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
-                                         ) : (
-                                             <code className={className} {...props}>
-                                                 {children}
-                                             </code>
-                                         );
-                                     }
-                                 }}
-                             >
-                                 {aiResults.openai?.aiGuidance}
-                             </ReactMarkdown>
-                            {aiResults.openai?.confidence && (
-                                <p>Confidence: {aiResults.openai.confidence}%</p>
-                            )}
-                            {aiResults.openai?.concerns && (
-                                <p>Concerns: {aiResults.openai.concerns}</p>
-                            )}
-                            {aiResults.prompt?.score && (
-                                <p>Score: {aiResults.prompt.score}%</p>
-                            )}
-                           {aiResults.prompt?.feedback && (
-                                <p>Feedback: {aiResults.prompt.feedback}</p>
-                           )}
-                             {aiResults.prompt?.promptSummary && (
-                                 <p>Prompt Summary: {aiResults.prompt.promptSummary}</p>
-                             )}
-                             </>
-                    )}
-
-                    {activeTab === 'gemini' && (
-                        <>
-                            <h4>AI Guidance (Gemini)</h4>
-                            <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                components={{
-                                    code({ className, children, ...props }) {
-                                        const match = /language-(\w+)/.exec(className || '');
-                                        return match ? (
-                                            <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
-                                        ) : (
-                                            <code className={className} {...props}>
-                                                {children}
-                                            </code>
-                                        );
-                                    }
-                                }}
-                            >
-                                {aiResults.gemini?.aiGuidance}
-                            </ReactMarkdown>
-                            {aiResults.gemini?.confidence && (
-                                <p>Confidence: {aiResults.gemini.confidence}%</p>
-                            )}
-                            {aiResults.gemini?.concerns && (
-                                <p>Concerns: {aiResults.gemini.concerns}</p>
-                            )}
-                            </>
-                    )}
-
-
-                    {activeTab === 'search' && (
-                        <>
-                            <h4>Google Search Results</h4>
-                            {aiResults.search?.results.map((result, index) => (
-                                <p key={index}>
-                                    <a href={result} target="_blank" rel="noopener noreferrer">{result}</a>
-                                </p>
-                            ))}
-                            {aiResults.search?.results.length === 0 && (
-                                <p>No search results to display</p>
-                            )}
-                               </>
-                    )}
-                </div>
-              </div>
-            )}
-          </div>
+          {transformedHistory.map((item, index) => (
+              <HistoryBundleDisplay key={index} {...item} sessionId={sessionId} index={index} />
+          ))}
+        </div>
     );
 };
 
