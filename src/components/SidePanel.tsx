@@ -121,8 +121,22 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDe
                           alignItems: "center",
                         }}
                       >
-                        <i className={`fas fa-chevron-${(showPromptSummaries[session.sessionId] ?? true) ? 'down' : 'right'}`} style={{ marginRight: "5px" }}></i>
-                        {(showPromptSummaries[session.sessionId] ?? true) ? "Hide Session Log" : "Show Session Log"}
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: "20px",
+                            height: "20px",
+                            lineHeight: "20px",
+                            textAlign: "center",
+                            border: "1px solid gray",
+                            borderRadius: "50%",
+                            fontWeight: "bold",
+                            backgroundColor: "#f0f0f0",
+                            marginRight: "5px",
+                          }}
+                        >
+                          {(showPromptSummaries[session.sessionId] ?? true) ? "-" : "+"}
+                        </span>
                       </span>
                       {(showPromptSummaries[session.sessionId] ?? true) && (
                         <ul style={{ listStyleType: "none", padding: 0 }}>

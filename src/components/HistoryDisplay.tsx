@@ -326,19 +326,37 @@ const HistoryBundleDisplay: React.FC<TransformedHistoryItem & { sessionId: strin
             <HistoryItemDisplay {...responses.gemini} sessionId={sessionId} index={index} />
           )}
           {activeTab === 'search' && responses.search && (
-            <div>
-              <strong>Search Results:</strong>
-              <ul>
-                {responses.search.map((result, idx) => (
-                  <li key={idx}>
-                    <a href={result} target="_blank" rel="noreferrer">
-                      {result}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+  <div>
+    <strong>Search Results:</strong>
+    <ul>
+    {activeTab === 'search' && responses.search && (
+  <div>
+    <strong>Search Results:</strong>
+    <ul>
+      {responses.search.message
+        .split('\n') // Split the results by newlines
+        .map((line, idx) => {
+          const match = line.match(/^(Result \d+): (.+?) - (https?:\/\/\S+)/);
+          if (match) {
+            const [, , title, url] = match; // Destructure the matched parts
+            return (
+              <li key={idx}>
+                <a href={url} target="_blank" rel="noreferrer">
+                  {title}
+                </a>
+              </li>
+            );
+          }
+          return null; // Skip lines that don't match
+        })
+        .filter(Boolean)} {/* Remove null entries */}
+    </ul>
+  </div>
+)}
+    </ul>
+  </div>
+)}
+
         </div>
       </div>
       <div className="divider"></div>

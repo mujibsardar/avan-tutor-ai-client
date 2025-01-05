@@ -18,27 +18,6 @@ export interface HistoryItem {
 
 // Define the type for AI response data
 interface AIResponse {
-  message: string;
-  aiResults: {
-      prompt: {
-          score: number | null;
-          feedback: string | null;
-          promptSummary: string | null;
-      }
-    openai: {
-      aiGuidance: string | null;
-      confidence: number | null;
-      concerns: string | null;
-    };
-    gemini: {
-      aiGuidance: string | null;
-      confidence: number | null;
-      concerns: string | null;
-    };
-    search: {
-      results: string[];
-    };
-  };
   updatedHistory: HistoryItem[];
 }
 

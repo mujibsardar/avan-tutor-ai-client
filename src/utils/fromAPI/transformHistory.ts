@@ -6,14 +6,13 @@
         responses: {
             openai?: HistoryItem;
             gemini?: HistoryItem;
-            search?: [];
+            search?: HistoryItem;
         };
     }
 
     export function transformHistory(history: HistoryItem[]): TransformedHistoryItem[] {
         const transformedHistory: TransformedHistoryItem[] = [];
         let currentItem: TransformedHistoryItem | null = null;
-        let searchResults: string[] | undefined;
 
 
         for (const item of history) {
@@ -34,15 +33,10 @@
             currentItem.responses.gemini = item;
             }
             else if (item.sender === "googleSearch" && currentItem){
-                // TODO Handle search results which is of type object array
-                // searchResults = item.message;
+                currentItem.responses.search = item;
             }
         }
         if (currentItem) {
-            if(searchResults){
-                // TODO
-                // currentItem.responses.search = searchResults;
-            }
             transformedHistory.push(currentItem);
         }
 
