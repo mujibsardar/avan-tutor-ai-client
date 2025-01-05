@@ -278,29 +278,75 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
     );
 };
 
-const HistoryBundleDisplay: React.FC< TransformedHistoryItem & { sessionId: string; index: number } > = ({ prompt, responses, sessionId, index }) => {
-    return (
-        <div className="history-bundle" id={`prompt-${sessionId}-${index}`}>
-            <HistoryItemDisplay {...prompt} sessionId={sessionId} index={index} />
-            {responses.openai && <HistoryItemDisplay {...responses.openai} sessionId={sessionId} index={index} />}
-            {responses.gemini && <HistoryItemDisplay {...responses.gemini} sessionId={sessionId} index={index} />}
-            {responses.search && (
-                <div style={{ marginTop: "10px" }}>
-                    <strong>Search Results:</strong>
-                    <ul style={{ listStyleType: "none", padding: 0 }}>
-                        {responses.search.map((result, index) => (
-                            <li key={index}>
-                                <a href={result} target="_blank" rel="noreferrer">
-                                    {result}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+const HistoryBundleDisplay: React.FC<TransformedHistoryItem & { sessionId: string; index: number }> = ({
+  prompt,
+  responses,
+  sessionId,
+  index,
+}) => {
+  const [activeTab, setActiveTab] = useState('openai'); // Default tab
+
+  return (
+    <div
+      className="history-bundle"
+      id={`prompt-${sessionId}-${index}`}
+    >
+      <div className="history-card">
+        {/* Prompt */}
+        <HistoryItemDisplay {...prompt} sessionId={sessionId} index={index} />
+
+        {/* Tab Navigation */}
+        <div className="tab-navigation">
+          <button
+            className={`tab-button ${activeTab === 'openai' ? 'active' : ''}`}
+            onClick={() => setActiveTab('openai')}
+          >
+            OpenAI
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'gemini' ? 'active' : ''}`}
+            onClick={() => setActiveTab('gemini')}
+          >
+            Gemini
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'search' ? 'active' : ''}`}
+            onClick={() => setActiveTab('search')}
+          >
+            Google Search
+          </button>
         </div>
-    );
-}
+
+        {/* Tab Content */}
+        <div className="tab-content">
+          {activeTab === 'openai' && responses.openai && (
+            <HistoryItemDisplay {...responses.openai} sessionId={sessionId} index={index} />
+          )}
+          {activeTab === 'gemini' && responses.gemini && (
+            <HistoryItemDisplay {...responses.gemini} sessionId={sessionId} index={index} />
+          )}
+          {activeTab === 'search' && responses.search && (
+            <div>
+              <strong>Search Results:</strong>
+              <ul>
+                {responses.search.map((result, idx) => (
+                  <li key={idx}>
+                    <a href={result} target="_blank" rel="noreferrer">
+                      {result}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="divider"></div>
+    </div>
+  );
+};
+
+
 
 interface AIResults {
     prompt: {
@@ -342,7 +388,18 @@ const HistoryDisplay: React.FC<HistoryDisplayProps> = ({ history, sessionId }) =
         }
     }, [history]);
 
+    console.log(' ');
+    console.log(`==> history: ${JSON.stringify(history, null, 2)}`);
+    console.log(' ');
+    console.log(' ');
+
+
     const transformedHistory = transformHistory(history);
+
+    console.log(' ');
+    console.log(`==> transformedHistory: ${JSON.stringify(transformedHistory, null, 2)}`);
+    console.log(' ');
+    console.log(' ');
 
     return (
         <div className="history-display" ref={historyDisplayRef}>

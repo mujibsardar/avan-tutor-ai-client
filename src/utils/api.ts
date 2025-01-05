@@ -5,7 +5,7 @@ const API_BASE_URL = "https://j41d2f5t31.execute-api.us-west-2.amazonaws.com/pro
 
 export interface HistoryItem {
   message: string;
-  sender: "user" | "openai" | "gemini";
+  sender: "user" | "openai" | "gemini" | "googleSearch";
   timestamp: string;
   score?: number;
   feedback?: string;

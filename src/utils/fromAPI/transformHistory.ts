@@ -6,7 +6,7 @@
         responses: {
             openai?: HistoryItem;
             gemini?: HistoryItem;
-            search?: string[];
+            search?: [];
         };
     }
 
@@ -33,12 +33,15 @@
             else if (item.sender === "gemini" && currentItem){
             currentItem.responses.gemini = item;
             }
-
-
+            else if (item.sender === "googleSearch" && currentItem){
+                // TODO Handle search results which is of type object array
+                // searchResults = item.message;
+            }
         }
         if (currentItem) {
             if(searchResults){
-                currentItem.responses.search = searchResults;
+                // TODO
+                // currentItem.responses.search = searchResults;
             }
             transformedHistory.push(currentItem);
         }
