@@ -330,29 +330,54 @@ const HistoryBundleDisplay: React.FC<TransformedHistoryItem & { sessionId: strin
     <strong>Search Results:</strong>
     <ul>
     {activeTab === 'search' && responses.search && (
-  <div>
-    <strong>Search Results:</strong>
-    <ul>
-      {responses.search.message
-        .split('\n') // Split the results by newlines
-        .map((line, idx) => {
-          const match = line.match(/^(Result \d+): (.+?) - (https?:\/\/\S+)/);
-          if (match) {
-            const [, , title, url] = match; // Destructure the matched parts
-            return (
-              <li key={idx}>
-                <a href={url} target="_blank" rel="noreferrer">
-                  {title}
-                </a>
-              </li>
-            );
-          }
-          return null; // Skip lines that don't match
-        })
-        .filter(Boolean)} {/* Remove null entries */}
-    </ul>
-  </div>
-)}
+        <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
+            <strong style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '10px' }}>Search Results:</strong>
+            <ul style={{ listStyleType: 'none', padding: '0' }}>
+            {responses.search.message
+                .split('\n\n') // Split by double newlines to separate results
+                .map((resultBlock, idx) => {
+                const titleMatch = resultBlock.match(/Title:\s*(.+)/);
+                const linkMatch = resultBlock.match(/Link:\s*(https?:\/\/\S+)/);
+                const descriptionMatch = resultBlock.match(/Description:\s*(.+)/);
+                const sourceMatch = resultBlock.match(/Source:\s*(\S+)/); // Extract the source
+
+                if (titleMatch && linkMatch) {
+                    const title = titleMatch[1].trim();
+                    const url = linkMatch[1].trim();
+                    const description = descriptionMatch ? descriptionMatch[1].trim() : "No description available.";
+                    const source = sourceMatch ? sourceMatch[1].trim() : "Unknown Source";
+
+                    return (
+                    <li key={idx} style={{ marginBottom: '20px' }}>
+                        <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                            color: '#1a73e8',
+                            textDecoration: 'none',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            display: 'block',
+                            marginBottom: '5px'
+                        }}
+                        >
+                        {title}
+                        </a>
+                        <p style={{ color: '#4d5156', marginBottom: '5px' }}>
+                        <span style={{ color: '#70757a' }}>{source} - </span>
+                        {url}
+                        </p>
+                        <p style={{ color: '#70757a', fontSize: '14px' }}>{description}</p>
+                    </li>
+                    );
+                }
+                return null; // Skip blocks that don't match the expected format
+                })
+                .filter(Boolean)} {/* Remove null entries */}
+            </ul>
+        </div>
+    )}
     </ul>
   </div>
 )}
