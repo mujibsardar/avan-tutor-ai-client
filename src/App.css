@@ -33,7 +33,8 @@ body {
 }
 
 .history-item {
-  overflow-x: auto;
+  /* overflow-x: auto; */
+  overflow: visible; /* Allows child elements to overflow */
 }
 
 .new-session input {

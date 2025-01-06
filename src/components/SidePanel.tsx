@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { NewSessionResponse } from "../utils/api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faChevronLeft, faChevronRight, faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import {transformHistory } from "../utils/fromAPI/transformHistory";
 
 interface SidePanelProps {
   sessions: NewSessionResponse[];
@@ -121,27 +122,21 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDe
                           alignItems: "center",
                         }}
                       >
-                        <span
+                        <FontAwesomeIcon
+                          icon={(showPromptSummaries[session.sessionId] ?? true) ? faChevronUp : faChevronDown}
                           style={{
-                            display: "inline-block",
-                            width: "20px",
-                            height: "20px",
-                            lineHeight: "20px",
-                            textAlign: "center",
-                            border: "1px solid gray",
-                            borderRadius: "50%",
-                            fontWeight: "bold",
-                            backgroundColor: "#f0f0f0",
-                            marginRight: "5px",
+                            fontSize: "1rem",
+                            color: "#555", // Neutral color
+                            cursor: "pointer",
+                            transition: "color 0.3s ease",
                           }}
-                        >
-                          {(showPromptSummaries[session.sessionId] ?? true) ? "-" : "+"}
-                        </span>
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "#007BFF")} // Hover color
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "#555")} // Reset color
+                        />
                       </span>
                       {(showPromptSummaries[session.sessionId] ?? true) && (
                         <ul style={{ listStyleType: "none", padding: 0 }}>
-                          {session.history.map((item, index) => (
-                            item.sender === "user" && item.promptSummary && (
+                          {transformHistory(session.history).map((item, index) => (
                               <li key={index} style={{ marginLeft: "15px", cursor: "pointer" }}>
                                 <a
                                   href={`#prompt-${session.sessionId}-${index}`}
@@ -161,11 +156,11 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDe
                                     fontSize: "0.9em",
                                   }}
                                 >
-                                  - {item.promptSummary.length > 30 ? item.promptSummary.substring(0, 30) + "..." : item.promptSummary}
+                                  - {item.prompt.promptSummary && item.prompt.promptSummary.length > 30 ? item.prompt.promptSummary.substring(0, 30) + "..." : item.prompt.promptSummary}
                                 </a>
                               </li>
                             )
-                          ))}
+                          )}
                         </ul>
                       )}
                     </>

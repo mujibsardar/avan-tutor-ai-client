@@ -149,21 +149,23 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
                             {hoveredInfo === "feedback" && (
                                 <div
                                     style={{
-                                        position: "absolute",
-                                        top: "20px",
-                                        left: "0",
-                                        backgroundColor: "white",
-                                        border: "1px solid #ccc",
+                                        position: "absolute", // Keeps it relative to the parent
+                                        top: "25px", // Adjust the position
+                                        left: "0", // Align with the info icon
+                                        backgroundColor: "white", // Ensure visibility
+                                        border: "1px solid #ccc", // Optional border for clarity
                                         padding: "15px",
                                         borderRadius: "5px",
-                                        zIndex: 10,
-                                        width: "300px",
-                                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                                        zIndex: 9999, // High z-index to place it on top
+                                        width: "300px", // Define the width to prevent layout shifts
+                                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Add a shadow for better visibility
+                                        overflow: "hidden", // Prevent internal scrolls
+                                        whiteSpace: "normal", // Prevent single-line overflow
                                     }}
                                 >
                                     {feedback}
                                 </div>
-                            )}
+)}
                             {promptSummary && (
                                 <span style={{ marginLeft: "10px", fontStyle: "italic" }}>
                                     {promptSummary}
