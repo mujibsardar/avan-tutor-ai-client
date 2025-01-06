@@ -132,7 +132,7 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
           </div>
         )}
       </div>
-      <BottomPanel onSend={handleSendToAI} />
+      <BottomPanel onSend={handleSendToAI} activeSession={activeSession} />
     </div>
   );
 }

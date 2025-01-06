@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { readTextFile } from "../utils/fileReaders"; // Assuming this handles reading files like .txt, .pdf, .docx
+import { NewSessionResponse } from "../utils/api"; // Import NewSessionResponse type
+
 
 interface BottomPanelProps {
-  onSend: (inputText: string) => void; // Callback for sending input
+  onSend: (inputText: string) => void;
+  activeSession: NewSessionResponse | null; // Add activeSession prop
 }
 
-function BottomPanel({ onSend }: BottomPanelProps) {
+function BottomPanel({ onSend, activeSession }: BottomPanelProps) {
   const [chatInput, setChatInput] = useState<string>("");
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [dragActive, setDragActive] = useState<boolean>(false);
@@ -57,6 +60,9 @@ function BottomPanel({ onSend }: BottomPanelProps) {
     }
   };
 
+// Determine if the input should be disabled
+const isDisabled = !activeSession || isLocked;
+
   return (
     <div
       className={`bottom-panel ${dragActive ? "drag-active" : ""}`}
@@ -79,23 +85,38 @@ function BottomPanel({ onSend }: BottomPanelProps) {
           </div>
         )}
         <textarea
-          value={chatInput}
-          onChange={handleTextChange}
-          onKeyDown={handleKeyPress} 
-          placeholder="Type a message, drag a document file (PDF, DOCX, TXT) or code file to upload"
-          disabled={isLocked}
-          style={{ 
-            border: "none", 
-            resize: "none", 
-            padding: 0,
-            width: "100%"
-          }}
+            value={chatInput}
+            onChange={handleTextChange}
+            onKeyDown={handleKeyPress}
+            placeholder={isDisabled ? "No session selected. Start a new session or select an existing session to send messages." : "Type a message, drag a document file (PDF, DOCX, TXT) or code file to upload"}
+            disabled={isDisabled}
+            style={{
+              border: "none",
+              resize: "none",
+              padding: 0,
+              width: "100%",
+              backgroundColor: isDisabled ? "#f0f0f0" : "white", // Grey background when disabled
+              color: isDisabled ? "#999" : "black", // Grey text when disabled
+              opacity: isDisabled ? 0.8 : 1,
+              pointerEvents: isDisabled ? 'none' : 'auto'
+            }}
         />
       </div>
       <div className="actions" style={{ display: "flex", alignItems: "center" }}>
-        <button onClick={handleSend} disabled={isLocked}>
-          Send
-        </button>
+      <button 
+          onClick={handleSend} 
+          disabled={isDisabled}
+          style={{
+            backgroundColor: isDisabled ? "#e0e0e0" : "#4CAF50", // Grey background when disabled, green when enabled
+            color: isDisabled ? "#999" : "white", // Grey text when disabled, white when enabled
+            cursor: isDisabled ? "not-allowed" : "pointer", // Change cursor to "not-allowed" when disabled
+            border: "none",
+            borderRadius: "4px",
+            padding: "8px 12px",
+          }}
+        > 
+        Send
+      </button>
       </div>
       {dragActive && <div className="drag-overlay">Drop your file here</div>}
     </div>
