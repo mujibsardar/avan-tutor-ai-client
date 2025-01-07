@@ -34,6 +34,7 @@ export interface NewSessionResponse {
   uploadedFiles: unknown[];
   history: HistoryItem[];
   createdAt: string;
+  modifiedAt?: string; // Add the modifiedAt field to the response type
 }
 
 // Define the type for fetching sessions
