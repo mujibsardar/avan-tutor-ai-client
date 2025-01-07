@@ -1,4 +1,3 @@
-// SignIn.tsx
 import  { useState } from "react";
 import { signIn } from 'aws-amplify/auth';
 import '../auth.css'; // Import auth.css
@@ -62,17 +61,6 @@ function SignInForm() {
         <div className="form-container sign-in-container">
             <form onSubmit={handleOnSubmit}>
                 <h1>Sign in</h1>
-                <div className="social-container">
-                    <a href="#" className="social">
-                        <i className="fab fa-facebook-f" />
-                    </a>
-                    <a href="#" className="social">
-                        <i className="fab fa-google-plus-g" />
-                    </a>
-                    <a href="#" className="social">
-                        <i className="fab fa-linkedin-in" />
-                    </a>
-                </div>
                 <span>or use your account</span>
                 <input
                     type="email"
@@ -80,6 +68,7 @@ function SignInForm() {
                     name="email"
                     value={state.email}
                     onChange={handleChange}
+                    autoComplete="email"
                 />
                 <input
                     type="password"
@@ -87,6 +76,7 @@ function SignInForm() {
                     placeholder="Password"
                     value={state.password}
                     onChange={handleChange}
+                    autoComplete="current-password"
                 />
                 {error && <p style={{ color: "red" }}>{error}</p>}
                 <a href="#">Forgot your password?</a>

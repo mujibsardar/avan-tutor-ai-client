@@ -1,4 +1,3 @@
-// SignUpForm.tsx
 import React, { useState } from "react";
 import { signUp } from 'aws-amplify/auth';
 import '../auth.css';
@@ -6,13 +5,15 @@ import '../auth.css';
 function SignUpForm() {
     const [state, setState] = useState({
         email: "",
-        password: ""
+        password: "",
+        confirmPassword: "",
     });
     const [error, setError] = useState<string | null>(null);
 
     interface SignUpFormState {
         email: string;
         password: string;
+        confirmPassword: string;
     }
 
     const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,13 +27,19 @@ function SignUpForm() {
     interface SignUpFormProps {
       email: string;
       password: string;
+      confirmPassword: string;
     }
-
 
     const handleOnSubmit = async (evt: React.FormEvent<HTMLFormElement>) => {
       evt.preventDefault();
 
-        const {  email, password }: SignUpFormProps = state;
+      const { email, password, confirmPassword }: SignUpFormProps = state;
+
+      if (password !== confirmPassword) {
+          setError("Passwords do not match");
+          return;
+      }
+
         try {
           await signUp({
             username: email,
@@ -49,24 +56,15 @@ function SignUpForm() {
         }
         setState({
             email: "",
-            password: ""
+            password: "",
+            confirmPassword: ""
         });
     }
+
     return (
         <div className="form-container sign-up-container">
             <form onSubmit={handleOnSubmit}>
                 <h1>Create Account</h1>
-                <div className="social-container">
-                    <a href="#" className="social">
-                        <i className="fab fa-facebook-f" />
-                    </a>
-                    <a href="#" className="social">
-                        <i className="fab fa-google-plus-g" />
-                    </a>
-                    <a href="#" className="social">
-                        <i className="fab fa-linkedin-in" />
-                    </a>
-                </div>
                 <span>or use your email for registration</span>
                 <input
                   type="email"
@@ -74,6 +72,7 @@ function SignUpForm() {
                   value={state.email}
                   onChange={handleChange}
                   placeholder="Email"
+                  autoComplete="email"
                 />
                 <input
                   type="password"
@@ -81,6 +80,15 @@ function SignUpForm() {
                   value={state.password}
                   onChange={handleChange}
                   placeholder="Password"
+                  autoComplete="new-password"
+                />
+                 <input
+                  type="password"
+                  name="confirmPassword"
+                  value={state.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm Password"
+                  autoComplete="new-password"
                 />
                 {error && <p style={{ color: "red" }}>{error}</p>}
                 <button>Sign Up</button>

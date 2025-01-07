@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuthenticator } from "@aws-amplify/ui-react";
 import Header from "./components/Header";
 import SplitScreen from "./components/SplitScreen";
 import { AuthUser } from "./types";
@@ -9,25 +8,39 @@ import "./auth.css";
 import SignInForm from "./components/SignIn";
 import SignUpForm from "./components/SignUp";
 import { getCurrentUser } from 'aws-amplify/auth';
+import { signOut } from 'aws-amplify/auth';
 
 
 type SessionsState = NewSessionResponse[];
 
 function App() {
-    const { signOut } = useAuthenticator();
     const [user, setUser] = useState<AuthUser | null>(null); // Use local state for user
     const [sessions, setSessions] = useState<SessionsState>([]);
     const [activeSession, setActiveSession] = useState<NewSessionResponse | null>(null);
     const [authForm, setAuthForm] = useState<'signIn' | 'signUp' | null>(null);
 
+    const handleSignOut = async () => { 
+        try {
+            await signOut();
+            setUser(null);
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    }
+
     useEffect(() => {
       const fetchUser = async () => {
           try {
               const userData = await getCurrentUser();
+              if (userData.signInDetails?.loginId) {
               setUser({
-                  username: userData.username,
+                  username: userData.signInDetails?.loginId,
                   userId: userData.userId,
               });
+                }
+                else {
+                    throw new Error("No user data found");
+                }
           } catch (error) {
               // User is not signed in, that's fine we just set the state to null
                setUser(null);
@@ -72,20 +85,23 @@ function App() {
 
     return (
     <div className="App">
-        <Header signOut={signOut} user={user} />
+        
         {user ? (
-            <SplitScreen
-                sessions={sessions}
-                setSessions={setSessions}
-                activeSession={activeSession}
-                setActiveSession={setActiveSession}
-                addSession={addSession}
-                handleSessionSelect={handleSessionSelect}
-                userId={user.userId}
-            />
+          <>
+            <Header signOut={handleSignOut} user={user} />
+              <SplitScreen
+                  sessions={sessions}
+                  setSessions={setSessions}
+                  activeSession={activeSession}
+                  setActiveSession={setActiveSession}
+                  addSession={addSession}
+                  handleSessionSelect={handleSessionSelect}
+                  userId={user.userId}
+              />
+            </>
         ) : (
+          <div className=".auth-wrapper">
              <div className="auth-page">
-                    <h2>Sign in/up Form</h2>
                     <div className={"container " + (authForm === "signUp" ? "right-panel-active" : "")} id="container">
                         <SignUpForm />
                         <SignInForm />
@@ -119,6 +135,7 @@ function App() {
                         </div>
                     </div>
               </div>
+          </div>
         )}
     </div>
     );

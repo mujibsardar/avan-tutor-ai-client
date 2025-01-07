@@ -1,5 +1,5 @@
 export interface AuthUser {
-  username: string;
+  username: string ;
   userId: string;
  signInDetails?: { // Making signInDetails Optional
       loginId: string;

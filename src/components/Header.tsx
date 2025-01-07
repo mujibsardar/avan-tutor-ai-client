@@ -2,7 +2,7 @@ import { AuthUser } from "../types";
 
 interface HeaderProps {
   signOut: () => void;
-  user?: AuthUser;
+  user?: AuthUser | null;
 }
 
 function Header({ signOut, user }: HeaderProps) {
@@ -15,7 +15,7 @@ function Header({ signOut, user }: HeaderProps) {
         ) : (
           <div className="user-info">
             <div className="user-welcome">
-              <h2>Welcome, {user.signInDetails?.loginId}</h2>
+              <h2>Welcome, {user.username}</h2>
               </div>
             <div className="user-actions">
               <button onClick={signOut}>Log Out</button>
