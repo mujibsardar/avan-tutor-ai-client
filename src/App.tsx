@@ -3,71 +3,125 @@ import { useAuthenticator } from "@aws-amplify/ui-react";
 import Header from "./components/Header";
 import SplitScreen from "./components/SplitScreen";
 import { AuthUser } from "./types";
-import { fetchSessions, NewSessionResponse, createNewSession } from "./utils/api"; // API function to fetch sessions
-import "./App.css";
+import { fetchSessions, NewSessionResponse, createNewSession } from "./utils/api";
+import "./App.css"; // Import main App CSS
+import "./auth.css";
+import SignInForm from "./components/SignIn";
+import SignUpForm from "./components/SignUp";
+import { getCurrentUser } from 'aws-amplify/auth';
 
-// Define the type for sessions state directly
-type SessionsState = NewSessionResponse[]; // Just an array of session objects
+
+type SessionsState = NewSessionResponse[];
 
 function App() {
-  const { user, signOut } = useAuthenticator();
-  const [sessions, setSessions] = useState<SessionsState>([]); // Manage sessions in App
-  const [activeSession, setActiveSession] = useState<NewSessionResponse | null>(null); // Store entire session object
+    const { signOut } = useAuthenticator();
+    const [user, setUser] = useState<AuthUser | null>(null); // Use local state for user
+    const [sessions, setSessions] = useState<SessionsState>([]);
+    const [activeSession, setActiveSession] = useState<NewSessionResponse | null>(null);
+    const [authForm, setAuthForm] = useState<'signIn' | 'signUp' | null>(null);
 
-  // Ensure TypeScript knows what 'user' looks like
-  const authUser = user as AuthUser;
-
-  useEffect(() => {
-    const loadSessions = async () => {
-      if (authUser) {
-        try {
-          const userSessions = await fetchSessions(authUser.userId);
-          setSessions(userSessions.sessions);
-        } catch (error) {
-          console.error("Error loading sessions:", error);
+    useEffect(() => {
+      const fetchUser = async () => {
+          try {
+              const userData = await getCurrentUser();
+              setUser({
+                  username: userData.username,
+                  userId: userData.userId,
+              });
+          } catch (error) {
+              // User is not signed in, that's fine we just set the state to null
+               setUser(null);
+          }
+      };
+      fetchUser();
+  }, []);
+    
+    useEffect(() => {
+        const loadSessions = async () => {
+            if (user) {
+                try {
+                    const userSessions = await fetchSessions(user.userId);
+                    setSessions(userSessions.sessions);
+                } catch (error) {
+                    console.error("Error loading sessions:", error);
+                }
+            }
+        };
+        loadSessions();
+    }, [user]);
+    
+    const addSession = async (sessionName: string) => {
+        if (user) {
+            try {
+                const newSession = await createNewSession({ studentId: user.userId, sessionName });
+                setSessions((prevSessions) => [...prevSessions, newSession]);
+                setActiveSession(newSession);
+            } catch (error) {
+                console.error("Error creating session:", error);
+            }
         }
-      }
     };
-
-    loadSessions();
-  }, [authUser]);
-
-  const addSession = async (sessionName: string) => {
-    if (authUser) {
-      try {
-        const newSession = await createNewSession({ studentId: authUser.userId, sessionName });
-        setSessions((prevSessions) => [...prevSessions, newSession]); // Add the session to the state
-        setActiveSession(newSession); // Set the new session as active
-      } catch (error) {
-        console.error("Error creating session:", error);
-      }
+    
+      const handleSessionSelect = (session: NewSessionResponse) => {
+        setActiveSession(session);
+    };
+    
+    const handleAuthForm = (type: 'signIn' | 'signUp' | null) => {
+      setAuthForm(type);
     }
-  };
 
-  const handleSessionSelect = (session: NewSessionResponse) => {
-    setActiveSession(session); // Set selected session as active
-  };
-
-  return (
-    <div className="App"> {/* Attach the ref to the App div */}
-      <Header signOut={signOut} user={authUser} />
-      {authUser ? (
-        <SplitScreen
-          sessions={sessions}
-          setSessions={setSessions} // Pass setSessions as a prop
-          activeSession={activeSession} // Pass the entire session object
-          setActiveSession={setActiveSession} // Pass setActiveSession as a prop
-          addSession={addSession}
-          handleSessionSelect={handleSessionSelect} // Pass the function to SplitScreen
-          userId={authUser.userId} // Pass the userId to SplitScreen
-        />
-      ) : (
-        <div>
-          <h1>Welcome to avantutor.ai</h1>
-        </div>
-      )}
+    return (
+    <div className="App">
+        <Header signOut={signOut} user={user} />
+        {user ? (
+            <SplitScreen
+                sessions={sessions}
+                setSessions={setSessions}
+                activeSession={activeSession}
+                setActiveSession={setActiveSession}
+                addSession={addSession}
+                handleSessionSelect={handleSessionSelect}
+                userId={user.userId}
+            />
+        ) : (
+             <div className="auth-page">
+                    <h2>Sign in/up Form</h2>
+                    <div className={"container " + (authForm === "signUp" ? "right-panel-active" : "")} id="container">
+                        <SignUpForm />
+                        <SignInForm />
+                        <div className="overlay-container">
+                            <div className="overlay">
+                                <div className="overlay-panel overlay-left">
+                                    <h1>Welcome Back!</h1>
+                                    <p>
+                                        To keep connected with us please login with your personal info
+                                    </p>
+                                    <button
+                                        className="ghost"
+                                        id="signIn"
+                                        onClick={() => handleAuthForm("signIn")}
+                                    >
+                                        Sign In
+                                    </button>
+                                </div>
+                                <div className="overlay-panel overlay-right">
+                                    <h1>Hello, Friend!</h1>
+                                    <p>Enter your personal details and start journey with us</p>
+                                    <button
+                                        className="ghost "
+                                        id="signUp"
+                                        onClick={() => handleAuthForm("signUp")}
+                                    >
+                                        Sign Up
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+              </div>
+        )}
     </div>
-  );
+    );
 }
 
 export default App;

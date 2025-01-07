@@ -1,9 +1,8 @@
 export interface AuthUser {
-    username: string;
-    userId: string;
-    signInDetails: {
+  username: string;
+  userId: string;
+ signInDetails?: { // Making signInDetails Optional
       loginId: string;
       authFlowType: string;
     };
-  }
-  
+}
