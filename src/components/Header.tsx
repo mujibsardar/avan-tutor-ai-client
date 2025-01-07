@@ -18,7 +18,6 @@ function Header({ signOut, user }: HeaderProps) {
               <h2>Welcome, {user.signInDetails?.loginId}</h2>
               </div>
             <div className="user-actions">
-              <p>Credits: 10</p> {/* Replace with dynamic credits */}
               <button onClick={signOut}>Log Out</button>
             </div>
           </div>

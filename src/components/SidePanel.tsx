@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { NewSessionResponse } from "../utils/api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faChevronLeft, faChevronRight, faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import {transformHistory } from "../utils/fromAPI/transformHistory";
+import { transformHistory } from "../utils/fromAPI/transformHistory";
 
 interface SidePanelProps {
   sessions: NewSessionResponse[];
@@ -10,9 +10,10 @@ interface SidePanelProps {
   onNewSession: (sessionName: string) => void;
   onSessionClick: (session: NewSessionResponse) => void;
   onDeleteSession: (sessionId: string) => void; // Add onDeleteSession prop
+  loadingSessions: boolean; // Add loading sessions prop
 }
 
-function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDeleteSession }: SidePanelProps) {
+function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDeleteSession, loadingSessions }: SidePanelProps) {
   const [newSessionName, setNewSessionName] = useState<string>("");
   const [isMinimized, setIsMinimized] = useState(false); // State to track minimized state
   const [showPromptSummaries, setShowPromptSummaries] = useState<{ [sessionId: string]: boolean }>({}); // State for toggling prompt summaries per session
@@ -39,7 +40,6 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDe
       [sessionId]: !prevState[sessionId]
     }));
   };
-
 
   return (
     <div className="side-panel" style={{ width: isMinimized ? '50px' : '20%', overflowY: "auto" }}>
@@ -79,7 +79,15 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDe
           <div className="sessions-list">
             <h3>Sessions</h3>
             <ul>
-              {sessions.map((session) => (
+              {loadingSessions ? (
+                // Render placeholders
+                 Array.from({ length: 3 }).map((_, index) => (
+                   <li key={index} className="placeholder-session" style={{marginBottom: "5px", backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px'}}>
+                     <div style={{height: '20px', width: '80%', backgroundColor: 'lightgrey', borderRadius: '4px'}}></div>
+                    </li>
+                  ))
+            ) : (
+               sessions.map((session) => (
                 <li key={session.sessionId}
                   style={{
                     marginBottom: "5px",
@@ -166,7 +174,8 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDe
                     </>
                   )}
                 </li>
-              ))}
+              ))
+            )}
             </ul>
           </div>
         </>
