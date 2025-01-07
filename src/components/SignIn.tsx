@@ -61,7 +61,6 @@ function SignInForm() {
         <div className="form-container sign-in-container">
             <form onSubmit={handleOnSubmit}>
                 <h1>Sign in</h1>
-                <span>or use your account</span>
                 <input
                     type="email"
                     placeholder="Email"
