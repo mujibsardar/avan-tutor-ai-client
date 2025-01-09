@@ -7,11 +7,17 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
+
+# Local environment files
 *.local
 .env
+.env.*
 
 # Editor directories and files
 .vscode/*
@@ -24,7 +30,31 @@ dist-ssr
 *.sln
 *.sw?
 
-# amplify
+# Firebase
+.firebase/
+.firebase/*.cache
+
+# Amplify
 .amplify
 amplify_outputs*
 amplifyconfiguration*
+amplify/backend/**/build/
+
+# GitHub Actions
+.github/
+.github/*
+
+# TypeScript
+*.tsbuildinfo
+
+# Miscellaneous
+file-structure.txt
+*.bak
+*.tmp
+
+# Specific exclusions from your project
+src/.DS_Store  # Redundant `.DS_Store` in `src`
+public/vite.svg  # Generated asset already in `dist`
+
+# Ignore sensitive or transient files
+LICENSE  # Include only if this is not part of your public repository.
