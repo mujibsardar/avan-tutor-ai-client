@@ -9,6 +9,7 @@ import SignInForm from "./components/SignIn";
 import SignUpForm from "./components/SignUp";
 import { getCurrentUser } from 'aws-amplify/auth';
 import { signOut } from 'aws-amplify/auth';
+import { Helmet } from "react-helmet"; 
 
 
 type SessionsState = NewSessionResponse[];
@@ -85,6 +86,14 @@ function App() {
 
     return (
     <div className="App">
+        <Helmet>
+            <title>AvanAiTutor - AI Tutoring with ChatGPT & Gemini</title>
+            <meta
+                name="description"
+                content="AvanAiTutor is an AI tutoring platform that uses ChatGPT and Gemini to help students learn and study more effectively."
+            />
+             <link rel="icon" href="/favicon.ico" />
+        </Helmet>
         
         {user ? (
           <>
