@@ -1,7 +1,11 @@
 import axios, { AxiosResponse } from "axios";
 import { parseHistory } from "./fromAPI/parseHistory"; // Import the parseHistory function
 
+const rawApiKey = process.env.VITE_API_KEY;
+// Sanitize API Key by removing quotes
+const apiKey = rawApiKey ? rawApiKey.replace(/^"|"$/g, '') : '';
 const API_BASE_URL = "https://j41d2f5t31.execute-api.us-west-2.amazonaws.com/prod";
+
 
 export interface HistoryItem {
   message: string;
@@ -53,6 +57,7 @@ export const createNewSession = async (
       {
         headers: {
           "Content-Type": "application/json",
+          "x-api-key": apiKey,  // Add the x-api-key header
         },
       }
     );
@@ -85,6 +90,7 @@ export const fetchAIResponse = async (
       {
         headers: {
           "Content-Type": "application/json",
+          "x-api-key": apiKey,  // Add the x-api-key header
         },
       }
     );
@@ -114,6 +120,7 @@ export const fetchSessions = async (
         params: { studentId },
         headers: {
           "Content-Type": "application/json",
+          "x-api-key": apiKey,  // Add the x-api-key header
         },
       }
     );
@@ -145,6 +152,7 @@ export const deleteSession = async (
     await axios.delete(`${API_BASE_URL}/sessions/${sessionId}/${userId}`, {
       headers: {
         "Content-Type": "application/json",
+        "x-api-key": apiKey,  // Add the x-api-key header
       },
     });
 
