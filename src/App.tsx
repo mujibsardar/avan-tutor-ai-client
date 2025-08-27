@@ -7,10 +7,9 @@ import "./App.css"; // Import main App CSS
 import "./auth.css";
 import SignInForm from "./components/SignIn";
 import SignUpForm from "./components/SignUp";
-import { getCurrentUser } from 'aws-amplify/auth';
-import { signOut } from 'aws-amplify/auth';
+import { getCurrentUser, signOut } from 'aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
 import { Helmet } from "react-helmet";
-
 
 type SessionsState = NewSessionResponse[];
 
@@ -19,6 +18,7 @@ function App() {
     const [sessions, setSessions] = useState<SessionsState>([]);
     const [activeSession, setActiveSession] = useState<NewSessionResponse | null>(null);
     const [authForm, setAuthForm] = useState<'signIn' | 'signUp' | null>(null);
+    const [isLoading, setIsLoading] = useState(true); // New state for loading indicator
 
     const handleSignOut = async () => {
         try {
@@ -29,25 +29,56 @@ function App() {
         }
     }
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const userData = await getCurrentUser();
-                if (userData.signInDetails?.loginId) {
-                    setUser({
-                        username: userData.signInDetails?.loginId,
-                        userId: userData.userId,
-                    });
-                }
-                else {
-                    throw new Error("No user data found");
-                }
-            } catch (error) {
-                // User is not signed in, that's fine we just set the state to null
-                setUser(null);
+    // Function to fetch and set user data
+    const fetchUser = async () => {
+        try {
+            const userData = await getCurrentUser();
+            if (userData.signInDetails?.loginId) {
+                setUser({
+                    username: userData.signInDetails?.loginId,
+                    userId: userData.userId,
+                });
+            } else {
+                throw new Error("No user data found");
             }
-        };
+        } catch (error) {
+            // User is not signed in, that's fine we just set the state to null
+            setUser(null);
+        } finally {
+            setIsLoading(false); // Set loading to false after user data is fetched or error
+        }
+    };
+
+    useEffect(() => {
+        // Initial user fetch
         fetchUser();
+
+        // Set up authentication state listener
+        const unsubscribe = Hub.listen('auth', ({ payload }) => {
+            switch (payload.event) {
+                case 'signedIn':
+                    console.log('User signed in, fetching user data...');
+                    fetchUser();
+                    break;
+                case 'signedOut':
+                    console.log('User signed out');
+                    setUser(null);
+                    break;
+                case 'tokenRefresh':
+                    console.log('Token refreshed');
+                    fetchUser();
+                    break;
+                case 'tokenRefresh_failure':
+                    console.log('Token refresh failed');
+                    setUser(null);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        // Cleanup listener on unmount
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
@@ -84,6 +115,11 @@ function App() {
         setAuthForm(type);
     }
 
+    const handleAuthSuccess = () => {
+        // Immediately fetch user data after successful authentication
+        fetchUser();
+    }
+
     return (
         <div className="App">
             <Helmet>
@@ -108,12 +144,21 @@ function App() {
                         userId={user.userId}
                     />
                 </>
+            ) : isLoading ? (
+                <div className="auth-wrapper">
+                    <div className="auth-page">
+                        <div className="loading-container">
+                            <div className="loading-spinner"></div>
+                            <p>Loading...</p>
+                        </div>
+                    </div>
+                </div>
             ) : (
                 <div className="auth-wrapper">
                     <div className="auth-page">
                         <div className={"container " + (authForm === "signUp" ? "right-panel-active" : "")} id="container">
-                            <SignUpForm />
-                            <SignInForm />
+                            <SignUpForm onAuthSuccess={handleAuthSuccess} onSwitchToSignIn={() => handleAuthForm("signIn")} />
+                            <SignInForm onAuthSuccess={handleAuthSuccess} />
                             <div className="overlay-container">
                                 <div className="overlay">
                                     <div className="overlay-panel overlay-left">

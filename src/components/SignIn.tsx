@@ -4,7 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock, faEye, faEyeSlash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import '../auth.css';
 
-function SignInForm() {
+interface SignInFormProps {
+    onAuthSuccess?: () => void;
+}
+
+function SignInForm({ onAuthSuccess }: SignInFormProps) {
     const [state, setState] = useState({
         email: "",
         password: ""
@@ -48,7 +52,18 @@ function SignInForm() {
                 password
             });
             console.log('Signed in successfully!');
-            // The page will reload automatically due to auth state change
+            
+            // Clear form
+            setState({ email: "", password: "" });
+            
+            // Notify parent component of successful authentication
+            if (onAuthSuccess) {
+                onAuthSuccess();
+            }
+            
+            // The Hub listener in App.tsx will handle the state update
+            // No need for manual page reload - the auth state will update automatically
+            
         } catch (error: unknown) {
             console.error('Failed to sign in', error);
             if (error instanceof Error) {

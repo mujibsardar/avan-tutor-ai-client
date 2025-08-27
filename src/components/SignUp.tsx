@@ -13,7 +13,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import "../auth.css";
 
-function SignUpForm() {
+interface SignUpFormProps {
+  onAuthSuccess?: () => void;
+  onSwitchToSignIn?: () => void;
+}
+
+function SignUpForm({ onAuthSuccess, onSwitchToSignIn }: SignUpFormProps) {
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -147,7 +152,12 @@ function SignUpForm() {
           });
           setIsOtpSent(false);
           setSuccess(null);
-        }, 3000);
+          
+          // Switch to sign in form for immediate login
+          if (onSwitchToSignIn) {
+            onSwitchToSignIn();
+          }
+        }, 2000);
       }
     } catch (error) {
       console.error("Failed to confirm sign-up", error);
