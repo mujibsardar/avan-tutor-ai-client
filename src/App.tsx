@@ -109,7 +109,7 @@ function App() {
                     />
                 </>
             ) : (
-                <div className=".auth-wrapper">
+                <div className="auth-wrapper">
                     <div className="auth-page">
                         <div className={"container " + (authForm === "signUp" ? "right-panel-active" : "")} id="container">
                             <SignUpForm />

@@ -1,6 +1,8 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { signIn } from 'aws-amplify/auth';
-import '../auth.css'; // Import auth.css
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope, faLock, faEye, faEyeSlash, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import '../auth.css';
 
 function SignInForm() {
     const [state, setState] = useState({
@@ -8,6 +10,8 @@ function SignInForm() {
         password: ""
     });
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     interface SignInFormState {
         email: string;
@@ -20,68 +24,131 @@ function SignInForm() {
             ...prevState,
             [evt.target.name]: value
         }));
+        // Clear error when user starts typing
+        if (error) setError(null);
     };
-
-    interface SignInFormProps {
-        email: string;
-        password: string;
-    }
 
     const handleOnSubmit = async (evt: React.FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
+        setLoading(true);
+        setError(null);
 
-        const { email, password }: SignInFormProps = state;
+        const { email, password } = state;
+        
+        // Basic validation
+        if (!email.trim() || !password.trim()) {
+            setError("Please fill in all fields");
+            setLoading(false);
+            return;
+        }
+
         try {
             await signIn({
                 username: email,
                 password
             });
-            window.location.reload();
-            // If sign in was successful, you can redirect to another page or
-            // update some state to indicate the user is logged in
             console.log('Signed in successfully!');
-
+            // The page will reload automatically due to auth state change
         } catch (error: unknown) {
             console.error('Failed to sign in', error);
             if (error instanceof Error) {
-                setError(error.message);
+                // Improve error messages for better UX
+                const errorMessage = error.message.includes('Incorrect username or password') 
+                    ? 'Invalid email or password. Please try again.'
+                    : error.message.includes('User is not confirmed')
+                    ? 'Please check your email and confirm your account before signing in.'
+                    : error.message;
+                setError(errorMessage);
             } else {
-                setError('An unknown error occurred');
+                setError('An unknown error occurred. Please try again.');
             }
-        }
-
-        for (const key in state) {
-            setState({
-                ...state,
-                [key]: ""
-            });
+        } finally {
+            setLoading(false);
         }
     };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
     return (
         <div className="form-container sign-in-container">
-            <form onSubmit={handleOnSubmit}>
-                <h1>Sign in</h1>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    name="email"
-                    value={state.email}
-                    onChange={handleChange}
-                    autoComplete="email"
-                />
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    value={state.password}
-                    onChange={handleChange}
-                    autoComplete="current-password"
-                />
-                {error && <p style={{ color: "red" }}>{error}</p>}
-                <a href="#">Forgot your password?</a>
-                <button>Sign In</button>
+            <form onSubmit={handleOnSubmit} className="auth-form">
+                <div className="form-header">
+                    <h1>Welcome Back</h1>
+                    <p>Sign in to continue to your AI tutoring sessions</p>
+                </div>
+                
+                <div className="input-group">
+                    <div className="input-wrapper">
+                        <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
+                        <input
+                            type="email"
+                            placeholder="Enter your email"
+                            name="email"
+                            value={state.email}
+                            onChange={handleChange}
+                            autoComplete="email"
+                            disabled={loading}
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div className="input-group">
+                    <div className="input-wrapper">
+                        <FontAwesomeIcon icon={faLock} className="input-icon" />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            placeholder="Enter your password"
+                            value={state.password}
+                            onChange={handleChange}
+                            autoComplete="current-password"
+                            disabled={loading}
+                            required
+                        />
+                        <button
+                            type="button"
+                            className="password-toggle"
+                            onClick={togglePasswordVisibility}
+                            disabled={loading}
+                        >
+                            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                        </button>
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="error-message">
+                        <FontAwesomeIcon icon={faEnvelope} className="error-icon" />
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                <div className="form-actions">
+                    <button 
+                        type="submit" 
+                        className="submit-button"
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <>
+                                <FontAwesomeIcon icon={faSpinner} className="spinner" />
+                                Signing In...
+                            </>
+                        ) : (
+                            'Sign In'
+                        )}
+                    </button>
+                    
+                    <a href="#" className="forgot-password">
+                        Forgot your password?
+                    </a>
+                </div>
             </form>
         </div>
     );
 }
+
 export default SignInForm;
