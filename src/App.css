@@ -302,6 +302,11 @@ body {
   overflow: hidden;
   /* Prevent body scrolling */
   position: relative;
+  /* Ensure no gaps between flex items */
+  gap: 0;
+  align-items: stretch;
+  /* Force items to be directly adjacent */
+  justify-content: flex-start;
 }
 
 /* Add subtle separator line between side panel and main content */
@@ -334,8 +339,8 @@ body:has(.side-panel.minimized) .split-screen::before {
   display: flex;
   flex-direction: column;
   background: var(--background-primary);
-  margin-left: var(--sidebar-width);
-  transition: margin-left var(--duration-normal) var(--ease-smooth);
+  /* Remove margin-left - flexbox handles positioning */
+  transition: all var(--duration-normal) var(--ease-smooth);
   height: 100%;
   overflow: hidden;
   position: relative;
@@ -377,16 +382,10 @@ body:has(.side-panel.minimized) .split-screen::before {
   background: #94a3b8;
 }
 
-/* Adjust main content when sidebar is minimized */
-body:has(.side-panel.minimized) .main-content {
-  margin-left: var(--sidebar-width-collapsed);
-}
+/* Remove the margin adjustment since we're not using margin-left anymore */
+/* The flexbox layout will handle positioning automatically */
 
 @media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-  }
-
   .content-wrapper {
     padding: var(--space-4);
   }
@@ -682,7 +681,6 @@ body:has(.side-panel.minimized) .main-content {
   }
   
   .main-content {
-    margin-left: 0;
     order: 2;
     flex: 1;
     border-left: none;
