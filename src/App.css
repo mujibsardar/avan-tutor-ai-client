@@ -301,6 +301,31 @@ body {
   background: var(--background-secondary);
   overflow: hidden;
   /* Prevent body scrolling */
+  position: relative;
+}
+
+/* Add subtle separator line between side panel and main content */
+.split-screen::before {
+  content: '';
+  position: absolute;
+  left: var(--sidebar-width);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--border-primary) 20%,
+    var(--border-primary) 80%,
+    transparent 100%
+  );
+  z-index: 1;
+  transition: left var(--duration-normal) var(--ease-smooth);
+}
+
+/* Adjust separator position when sidebar is minimized */
+body:has(.side-panel.minimized) .split-screen::before {
+  left: var(--sidebar-width-collapsed);
 }
 
 /* ===== MAIN CONTENT AREA ===== */
@@ -313,8 +338,10 @@ body {
   transition: margin-left var(--duration-normal) var(--ease-smooth);
   height: 100%;
   overflow: hidden;
-  /* Prevent main content from scrolling */
   position: relative;
+  /* Add subtle border and shadow for better separation */
+  border-left: 1px solid var(--border-secondary);
+  box-shadow: inset 2px 0 8px rgba(0, 0, 0, 0.02);
 }
 
 /* Content wrapper for proper scrolling */
@@ -322,10 +349,14 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--space-6);
+  padding: var(--space-8);
   /* Custom scrollbar styling */
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
+  /* Add subtle background pattern */
+  background:
+    radial-gradient(circle at 20% 80%, rgba(255, 182, 6, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(101, 13, 136, 0.03) 0%, transparent 50%);
 }
 
 .content-wrapper::-webkit-scrollbar {
@@ -486,12 +517,17 @@ body:has(.side-panel.minimized) .main-content {
 
 /* ===== OUTPUT SECTION ===== */
 .output-section {
-  padding: var(--space-6);
+  padding: var(--space-8);
   background: var(--surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-primary);
   margin-bottom: var(--space-4);
+  /* Add subtle background pattern */
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 182, 6, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(101, 13, 136, 0.05) 0%, transparent 50%);
+  background-color: var(--surface);
 }
 
 .output-section p {
@@ -499,6 +535,7 @@ body:has(.side-panel.minimized) .main-content {
   color: var(--text-primary);
   line-height: var(--leading-relaxed);
   font-size: var(--text-base);
+  font-weight: var(--font-weight-medium);
 }
 
 /* ===== LOADING STATES ===== */
@@ -511,9 +548,14 @@ body:has(.side-panel.minimized) .main-content {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   z-index: 1000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  /* Add subtle background pattern */
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 182, 6, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(101, 13, 136, 0.1) 0%, transparent 50%);
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .input-caption {
@@ -631,22 +673,29 @@ body:has(.side-panel.minimized) .main-content {
   .split-screen {
     flex-direction: column;
   }
-
+  
   .side-panel {
     width: 100%;
     height: auto;
     max-height: 300px;
     order: 1;
   }
-
+  
   .main-content {
     margin-left: 0;
     order: 2;
     flex: 1;
+    border-left: none;
+    box-shadow: none;
   }
-
+  
   .bottom-panel {
     order: 3;
+  }
+  
+  /* Hide separator on mobile */
+  .split-screen::before {
+    display: none;
   }
 }
 
@@ -654,13 +703,18 @@ body:has(.side-panel.minimized) .main-content {
   .split-screen {
     height: calc(100vh - var(--header-height) - 60px);
   }
-
+  
   .content-wrapper {
     padding: var(--space-4);
   }
-
+  
   .side-panel {
     max-height: 250px;
+  }
+  
+  .output-section {
+    padding: var(--space-6);
+    margin-bottom: var(--space-3);
   }
 }
 
@@ -668,8 +722,13 @@ body:has(.side-panel.minimized) .main-content {
   .split-screen {
     height: calc(100vh - var(--header-height) - 80px);
   }
-
+  
   .content-wrapper {
     padding: var(--space-3);
+  }
+  
+  .output-section {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
   }
 }

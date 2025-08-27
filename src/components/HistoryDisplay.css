@@ -5,8 +5,8 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--space-6);
-  background: var(--background-secondary);
+  padding: 0; /* Remove padding since content-wrapper handles it */
+  background: transparent; /* Make transparent to show content-wrapper background */
   margin-bottom: 60px; /* Space for bottom panel */
   max-height: calc(100vh - var(--header-height) - 120px);
   scroll-behavior: smooth;
@@ -37,6 +37,18 @@
 .history-bundle {
   margin-bottom: var(--space-8);
   animation: fadeInUp var(--duration-normal) var(--ease-out);
+  /* Add subtle background and better spacing */
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-primary);
+  overflow: hidden;
+  transition: var(--transition-all);
+}
+
+.history-bundle:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .history-bundle:last-child {
@@ -44,51 +56,64 @@
 }
 
 .history-card {
-  background: var(--surface);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
-  border: 1px solid var(--border-primary);
+  background: transparent; /* Make transparent to show bundle background */
+  border-radius: 0; /* Remove border radius since bundle handles it */
+  box-shadow: none; /* Remove shadow since bundle handles it */
+  border: none; /* Remove border since bundle handles it */
   overflow: hidden;
   transition: var(--transition-all);
 }
 
 .history-card:hover {
-  box-shadow: var(--card-shadow-hover);
-  transform: translateY(-2px);
+  box-shadow: none; /* Remove shadow since bundle handles it */
+  transform: none; /* Remove transform since bundle handles it */
 }
 
 /* ===== HISTORY ITEM STYLING ===== */
 
 .history-item {
-  padding: var(--space-5);
+  padding: var(--space-6);
   border-radius: 0;
   transition: var(--transition-all);
   position: relative;
+  /* Add subtle separators between items */
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.history-item:last-child {
+  border-bottom: none;
 }
 
 /* User Messages */
 .history-item.user-message {
   background: linear-gradient(135deg, rgba(255, 182, 6, 0.05) 0%, rgba(255, 182, 6, 0.02) 100%);
   border-left: 4px solid var(--primary-gold);
-  margin-bottom: var(--space-2);
+  margin-bottom: 0; /* Remove margin since we have borders now */
+  /* Add subtle shadow for depth */
+  box-shadow: inset 0 1px 0 rgba(255, 182, 6, 0.1);
 }
 
 .history-item.user-message:hover {
   background: linear-gradient(135deg, rgba(255, 182, 6, 0.08) 0%, rgba(255, 182, 6, 0.04) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 182, 6, 0.15);
 }
 
 /* AI Messages */
 .history-item.ai-message {
   background: var(--surface);
   border-left: 4px solid var(--success);
+  /* Add subtle shadow for depth */
+  box-shadow: inset 0 1px 0 rgba(16, 185, 129, 0.1);
 }
 
 .history-item.ai-message.openai {
   border-left-color: var(--info);
+  box-shadow: inset 0 1px 0 rgba(59, 130, 246, 0.1);
 }
 
 .history-item.ai-message.gemini {
   border-left-color: var(--success);
+  box-shadow: inset 0 1px 0 rgba(16, 185, 129, 0.1);
 }
 
 /* Message Header */
@@ -158,23 +183,49 @@
 
 /* Message Content */
 .message-content {
-  background: var(--gray-50);
-  padding: var(--space-4);
+  background: var(--white);
+  padding: var(--space-5);
   border-radius: var(--radius-lg);
   font-family: var(--font-primary);
   line-height: var(--leading-relaxed);
   position: relative;
   transition: var(--transition-all);
   word-break: break-word;
+  border: 1px solid var(--border-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.message-content:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-primary);
 }
 
 .message-content.expandable {
   max-height: 200px;
   overflow: hidden;
+  position: relative;
 }
 
 .message-content.expanded {
   max-height: none;
+}
+
+/* Add fade effect for expandable content */
+.message-content.expandable::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--white));
+  pointer-events: none;
+  opacity: 1;
+  transition: var(--transition-opacity);
+}
+
+.message-content.expanded::after {
+  opacity: 0;
 }
 
 /* Expand/Collapse Button */
