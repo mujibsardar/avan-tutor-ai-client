@@ -7,16 +7,16 @@ import { HistoryItem } from "../utils/api";
 import { transformHistory, TransformedHistoryItem } from "../utils/fromAPI/transformHistory";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCopy,
-  faCheck,
-  faUser,
-  faRobot,
-  faSearch,
-  faInfoCircle,
-  faChevronDown,
-  faChevronUp,
-  faExternalLinkAlt,
-  faComments
+    faCopy,
+    faCheck,
+    faUser,
+    faRobot,
+    faSearch,
+    faInfoCircle,
+    faChevronDown,
+    faChevronUp,
+    faExternalLinkAlt,
+    faComments
 } from '@fortawesome/free-solid-svg-icons';
 import './HistoryDisplay.css';
 
@@ -62,9 +62,9 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
                     </div>
                 )}
             </div>
-            <SyntaxHighlighter 
-                style={oneDark} 
-                language={language} 
+            <SyntaxHighlighter
+                style={oneDark}
+                language={language}
                 PreTag="div"
                 customStyle={{
                     margin: 0,
@@ -80,15 +80,58 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
 
 // Utility to format the timestamp
 const formatTimestamp = (timestamp: string): string => {
-  const date = new Date(timestamp);
-  return date.toLocaleTimeString();
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString();
+};
+
+// Utility to get sender information
+const getSenderInfo = (sender: string) => {
+    switch (sender) {
+        case 'user':
+            return { name: 'You', avatar: 'U', class: 'user' };
+        case 'openai':
+            return { name: 'AI (OpenAI)', avatar: 'AI', class: 'openai' };
+        case 'gemini':
+            return { name: 'AI (Gemini)', avatar: 'AI', class: 'gemini' };
+        default:
+            return { name: 'Unknown', avatar: '?', class: 'user' };
+    }
 };
 
 // Component to display a single history item
-const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: number }> = ({ message, sender, timestamp, score, feedback, confidence, concerns, promptSummary}) => {
+const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: number }> = ({ message, sender, timestamp, score, feedback, confidence, concerns, promptSummary }) => {
     const formattedTime = formatTimestamp(timestamp);
     const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
     const [expanded, setExpanded] = useState(false);
+
+    // Safety check: if message is undefined, show a fallback
+    if (!message) {
+        return (
+            <div className={`history-item ${sender}-message error`}>
+                <div className="message-header">
+                    <div className="sender-info">
+                        <div className={`sender-avatar ${sender}`}>
+                            {getSenderInfo(sender).avatar}
+                        </div>
+                        <div>
+                            <div className={`sender-name ${sender}`}>
+                                {getSenderInfo(sender).name}
+                            </div>
+                            <div className="message-timestamp">
+                                {formattedTime}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="message-content error">
+                    <p className="error-message">
+                        <FontAwesomeIcon icon={faInfoCircle} className="error-icon" />
+                        Message content is not available
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     // Determine metric classes based on values
     const getScoreClass = (score: number) => {
@@ -101,20 +144,8 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
     const getConfidenceClass = (confidence: number) => {
         if (confidence >= 90) return 'excellent';
         if (confidence >= 70) return 'good';
-        return 'fair';
-    };
-
-    const getSenderInfo = (sender: string) => {
-        switch (sender) {
-            case 'user':
-                return { name: 'You', avatar: 'U', class: 'user' };
-            case 'openai':
-                return { name: 'AI (OpenAI)', avatar: 'AI', class: 'openai' };
-            case 'gemini':
-                return { name: 'AI (Gemini)', avatar: 'AI', class: 'gemini' };
-            default:
-                return { name: 'Unknown', avatar: '?', class: 'user' };
-        }
+        if (confidence >= 50) return 'fair';
+        return 'poor';
     };
 
     const senderInfo = getSenderInfo(sender);
@@ -147,8 +178,8 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
                             </div>
                             {feedback && (
                                 <div className="info-icon-wrapper">
-                                    <FontAwesomeIcon 
-                                        icon={faInfoCircle} 
+                                    <FontAwesomeIcon
+                                        icon={faInfoCircle}
                                         className="info-icon"
                                         onMouseEnter={() => setHoveredInfo("feedback")}
                                         onMouseLeave={() => setHoveredInfo(null)}
@@ -171,8 +202,8 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
                             </div>
                             {concerns && (
                                 <div className="info-icon-wrapper">
-                                    <FontAwesomeIcon 
-                                        icon={faInfoCircle} 
+                                    <FontAwesomeIcon
+                                        icon={faInfoCircle}
                                         className="info-icon"
                                         onMouseEnter={() => setHoveredInfo("concerns")}
                                         onMouseLeave={() => setHoveredInfo(null)}
@@ -232,106 +263,125 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
 };
 
 const HistoryBundleDisplay: React.FC<TransformedHistoryItem & { sessionId: string; index: number }> = ({
-  prompt,
-  responses,
-  sessionId,
-  index,
+    prompt,
+    responses,
+    sessionId,
+    index,
 }) => {
-  const [activeTab, setActiveTab] = useState('openai'); // Default tab
+    const [activeTab, setActiveTab] = useState('openai'); // Default tab
 
-  return (
-    <div
-      className="history-bundle"
-      id={`prompt-${sessionId}-${index}`}
-    >
-      <div className="history-card">
-        {/* Prompt */}
-        <HistoryItemDisplay {...prompt} sessionId={sessionId} index={index} />
+    return (
+        <div
+            className="history-bundle"
+            id={`prompt-${sessionId}-${index}`}
+        >
+            <div className="history-card">
+                {/* Prompt */}
+                <HistoryItemDisplay {...prompt} sessionId={sessionId} index={index} />
 
-        {/* Tab Navigation */}
-        <div className="tab-navigation">
-          <button
-            className={`tab-button ${activeTab === 'openai' ? 'active' : ''}`}
-            onClick={() => setActiveTab('openai')}
-          >
-            <FontAwesomeIcon icon={faRobot} className="tab-icon" />
-            OpenAI
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'gemini' ? 'active' : ''}`}
-            onClick={() => setActiveTab('gemini')}
-          >
-            <FontAwesomeIcon icon={faRobot} className="tab-icon" />
-            Gemini
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'search' ? 'active' : ''}`}
-            onClick={() => setActiveTab('search')}
-          >
-            <FontAwesomeIcon icon={faSearch} className="tab-icon" />
-            Search Results
-          </button>
-        </div>
+                {/* Tab Navigation */}
+                <div className="tab-navigation">
+                    <button
+                        className={`tab-button ${activeTab === 'openai' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('openai')}
+                    >
+                        <FontAwesomeIcon icon={faRobot} className="tab-icon" />
+                        OpenAI
+                    </button>
+                    <button
+                        className={`tab-button ${activeTab === 'gemini' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('gemini')}
+                    >
+                        <FontAwesomeIcon icon={faRobot} className="tab-icon" />
+                        Gemini
+                    </button>
+                    <button
+                        className={`tab-button ${activeTab === 'search' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('search')}
+                    >
+                        <FontAwesomeIcon icon={faSearch} className="tab-icon" />
+                        Search Results
+                    </button>
+                </div>
 
-        {/* Tab Content */}
-        <div className="tab-content">
-          {activeTab === 'openai' && responses.openai && (
-            <HistoryItemDisplay {...responses.openai} sessionId={sessionId} index={index} />
-          )}
-          {activeTab === 'gemini' && responses.gemini && (
-            <HistoryItemDisplay {...responses.gemini} sessionId={sessionId} index={index} />
-          )}
-          {activeTab === 'search' && responses.search && (
-            <div className="search-results">
-              <h3 className="search-results-title">
-                <FontAwesomeIcon icon={faSearch} />
-                Search Results
-              </h3>
-              <ul className="search-results-list">
-                {responses.search.message
-                  .split('\n\n')
-                  .map((resultBlock, idx) => {
-                    const titleMatch = resultBlock.match(/Title:\s*(.+)/);
-                    const linkMatch = resultBlock.match(/Link:\s*(https?:\/\/\S+)/);
-                    const descriptionMatch = resultBlock.match(/Description:\s*(.+)/);
-                    const sourceMatch = resultBlock.match(/Source:\s*(\S+)/);
+                {/* Tab Content */}
+                <div className="tab-content">
+                    {activeTab === 'openai' && responses.openai && (
+                        <HistoryItemDisplay {...responses.openai} sessionId={sessionId} index={index} />
+                    )}
+                    {activeTab === 'gemini' && responses.gemini && (
+                        <HistoryItemDisplay {...responses.gemini} sessionId={sessionId} index={index} />
+                    )}
+                    {activeTab === 'search' && responses.search && (
+                        <div className="search-results">
+                            <h3 className="search-results-title">
+                                <FontAwesomeIcon icon={faSearch} />
+                                Search Results
+                            </h3>
+                            <ul className="search-results-list">
+                                {responses.search.message
+                                    .split('\n\n')
+                                    .map((resultBlock, idx) => {
+                                        const titleMatch = resultBlock.match(/Title:\s*(.+)/);
+                                        const linkMatch = resultBlock.match(/Link:\s*(https?:\/\/\S+)/);
+                                        const descriptionMatch = resultBlock.match(/Description:\s*(.+)/);
+                                        const sourceMatch = resultBlock.match(/Source:\s*(\S+)/);
 
-                    if (titleMatch && linkMatch) {
-                      const title = titleMatch[1].trim();
-                      const url = linkMatch[1].trim();
-                      const description = descriptionMatch ? descriptionMatch[1].trim() : "No description available.";
-                      const source = sourceMatch ? sourceMatch[1].trim() : "Unknown Source";
+                                        if (titleMatch && linkMatch) {
+                                            const title = titleMatch[1].trim();
+                                            const url = linkMatch[1].trim();
+                                            const description = descriptionMatch ? descriptionMatch[1].trim() : "No description available.";
+                                            const source = sourceMatch ? sourceMatch[1].trim() : "Unknown Source";
 
-                      return (
-                        <li key={idx} className="search-result-item">
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="search-result-title"
-                          >
-                            {title}
-                            <FontAwesomeIcon icon={faExternalLinkAlt} style={{ marginLeft: '8px', fontSize: '0.8em' }} />
-                          </a>
-                          <div className="search-result-url">
-                            <span className="search-result-source">{source}</span> - {url}
-                          </div>
-                          <p className="search-result-description">{description}</p>
-                        </li>
-                      );
-                    }
-                    return null;
-                  })
-                  .filter(Boolean)}
-              </ul>
+                                            return (
+                                                <li key={idx} className="search-result-item">
+                                                    <a
+                                                        href={url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="search-result-title"
+                                                    >
+                                                        {title}
+                                                        <FontAwesomeIcon icon={faExternalLinkAlt} style={{ marginLeft: '8px', fontSize: '0.8em' }} />
+                                                    </a>
+                                                    <div className="search-result-url">
+                                                        <span className="search-result-source">{source}</span> - {url}
+                                                    </div>
+                                                    <p className="search-result-description">{description}</p>
+                                                </li>
+                                            );
+                                        }
+                                        return null;
+                                    })
+                                    .filter(Boolean)}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Show appropriate message when no response is available */}
+                    {activeTab === 'openai' && !responses.openai && (
+                        <div className="no-response-message">
+                            <FontAwesomeIcon icon={faRobot} className="no-response-icon" />
+                            <p>No OpenAI response available for this prompt.</p>
+                        </div>
+                    )}
+                    {activeTab === 'gemini' && !responses.gemini && (
+                        <div className="no-response-message">
+                            <FontAwesomeIcon icon={faRobot} className="no-response-icon" />
+                            <p>No Gemini response available for this prompt.</p>
+                        </div>
+                    )}
+                    {activeTab === 'search' && !responses.search && (
+                        <div className="no-response-message">
+                            <FontAwesomeIcon icon={faSearch} className="no-response-icon" />
+                            <p>No search results available for this prompt.</p>
+                        </div>
+                    )}
+                </div>
             </div>
-          )}
-
+            <div className="divider"></div>
         </div>
-      </div>
-      <div className="divider"></div>
-    </div>
-  );
+    );
 };
 
 
@@ -391,19 +441,19 @@ const HistoryDisplay: React.FC<HistoryDisplayProps> = ({ history, sessionId }) =
 
     return (
         <div className="history-display" ref={historyDisplayRef}>
-          {transformedHistory.length === 0 ? (
-            <div className="history-empty">
-              <FontAwesomeIcon icon={faComments} className="history-empty-icon" />
-              <h2 className="history-empty-title">No conversation yet</h2>
-              <p className="history-empty-description">
-                Start a conversation with your AI tutor by typing a message or uploading a document below.
-              </p>
-            </div>
-          ) : (
-            transformedHistory.map((item, index) => (
-              <HistoryBundleDisplay key={index} {...item} sessionId={sessionId} index={index} />
-            ))
-          )}
+            {transformedHistory.length === 0 ? (
+                <div className="history-empty">
+                    <FontAwesomeIcon icon={faComments} className="history-empty-icon" />
+                    <h2 className="history-empty-title">No conversation yet</h2>
+                    <p className="history-empty-description">
+                        Start a conversation with your AI tutor by typing a message or uploading a document below.
+                    </p>
+                </div>
+            ) : (
+                transformedHistory.map((item, index) => (
+                    <HistoryBundleDisplay key={index} {...item} sessionId={sessionId} index={index} />
+                ))
+            )}
         </div>
     );
 };
