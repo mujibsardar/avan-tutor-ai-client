@@ -22,7 +22,7 @@ function Header({ signOut, user }: HeaderProps) {
         {/* Brand Section */}
         <div className="header-brand">
           <FontAwesomeIcon icon={faBrain} className="header-icon" />
-          <h1>AvanTutor.ai</h1>
+          <h1>AvanAITutor.com</h1>
         </div>
 
         {/* Trust Indicators */}
@@ -53,16 +53,16 @@ function Header({ signOut, user }: HeaderProps) {
               <h2>Welcome, {user.username}</h2>
               <p className="user-status">AI Prompt Tutor • Ready to learn</p>
             </div>
-            
+
             <div className="user-profile">
               <div className="user-avatar">
                 {user.username.charAt(0).toUpperCase()}
               </div>
             </div>
-            
+
             <div className="user-actions">
-              <button 
-                onClick={signOut} 
+              <button
+                onClick={signOut}
                 className="btn-primary"
                 title="Sign out of your account"
               >

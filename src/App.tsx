@@ -9,7 +9,7 @@ import SignInForm from "./components/SignIn";
 import SignUpForm from "./components/SignUp";
 import { getCurrentUser } from 'aws-amplify/auth';
 import { signOut } from 'aws-amplify/auth';
-import { Helmet } from "react-helmet"; 
+import { Helmet } from "react-helmet";
 
 
 type SessionsState = NewSessionResponse[];
@@ -20,7 +20,7 @@ function App() {
     const [activeSession, setActiveSession] = useState<NewSessionResponse | null>(null);
     const [authForm, setAuthForm] = useState<'signIn' | 'signUp' | null>(null);
 
-    const handleSignOut = async () => { 
+    const handleSignOut = async () => {
         try {
             await signOut();
             setUser(null);
@@ -30,26 +30,26 @@ function App() {
     }
 
     useEffect(() => {
-      const fetchUser = async () => {
-          try {
-              const userData = await getCurrentUser();
-              if (userData.signInDetails?.loginId) {
-              setUser({
-                  username: userData.signInDetails?.loginId,
-                  userId: userData.userId,
-              });
+        const fetchUser = async () => {
+            try {
+                const userData = await getCurrentUser();
+                if (userData.signInDetails?.loginId) {
+                    setUser({
+                        username: userData.signInDetails?.loginId,
+                        userId: userData.userId,
+                    });
                 }
                 else {
                     throw new Error("No user data found");
                 }
-          } catch (error) {
-              // User is not signed in, that's fine we just set the state to null
-               setUser(null);
-          }
-      };
-      fetchUser();
-  }, []);
-    
+            } catch (error) {
+                // User is not signed in, that's fine we just set the state to null
+                setUser(null);
+            }
+        };
+        fetchUser();
+    }, []);
+
     useEffect(() => {
         const loadSessions = async () => {
             if (user) {
@@ -63,7 +63,7 @@ function App() {
         };
         loadSessions();
     }, [user]);
-    
+
     const addSession = async (sessionName: string) => {
         if (user) {
             try {
@@ -75,78 +75,78 @@ function App() {
             }
         }
     };
-    
-      const handleSessionSelect = (session: NewSessionResponse) => {
+
+    const handleSessionSelect = (session: NewSessionResponse) => {
         setActiveSession(session);
     };
-    
+
     const handleAuthForm = (type: 'signIn' | 'signUp' | null) => {
-      setAuthForm(type);
+        setAuthForm(type);
     }
 
     return (
-    <div className="App">
-        <Helmet>
-            <title>AvanAiTutor - AI Tutoring with ChatGPT & Gemini</title>
-            <meta
-                name="description"
-                content="AvanAiTutor is an AI tutoring platform that uses ChatGPT and Gemini to help students learn and study more effectively."
-            />
-             <link rel="icon" href="/favicon.ico" />
-        </Helmet>
-        
-        {user ? (
-          <>
-            <Header signOut={handleSignOut} user={user} />
-              <SplitScreen
-                  sessions={sessions}
-                  setSessions={setSessions}
-                  activeSession={activeSession}
-                  setActiveSession={setActiveSession}
-                  addSession={addSession}
-                  handleSessionSelect={handleSessionSelect}
-                  userId={user.userId}
-              />
-            </>
-        ) : (
-          <div className=".auth-wrapper">
-             <div className="auth-page">
-                    <div className={"container " + (authForm === "signUp" ? "right-panel-active" : "")} id="container">
-                        <SignUpForm />
-                        <SignInForm />
-                        <div className="overlay-container">
-                            <div className="overlay">
-                                <div className="overlay-panel overlay-left">
-                                    <h1>Welcome Back!</h1>
-                                    <p>
-                                        We saved all your stuff for you.
-                                    </p>
-                                    <button
-                                        className="ghost"
-                                        id="signIn"
-                                        onClick={() => handleAuthForm("signIn")}
-                                    >
-                                        Sign In
-                                    </button>
-                                </div>
-                                <div className="overlay-panel overlay-right">
-                                    <h1>Hello, Student!</h1>
-                                    <p>Just enter your email and choose a password to get started</p>
-                                    <button
-                                        className="ghost "
-                                        id="signUp"
-                                        onClick={() => handleAuthForm("signUp")}
-                                    >
-                                        Sign Up
-                                    </button>
+        <div className="App">
+            <Helmet>
+                <title>AvanAiTutor - Master AI interactions & prompt engineering</title>
+                <meta
+                    name="description"
+                    content="AvanAiTutor is an AI tutoring platform that uses ChatGPT and Gemini to help students learn and study more effectively."
+                />
+                <link rel="icon" href="/favicon.ico" />
+            </Helmet>
+
+            {user ? (
+                <>
+                    <Header signOut={handleSignOut} user={user} />
+                    <SplitScreen
+                        sessions={sessions}
+                        setSessions={setSessions}
+                        activeSession={activeSession}
+                        setActiveSession={setActiveSession}
+                        addSession={addSession}
+                        handleSessionSelect={handleSessionSelect}
+                        userId={user.userId}
+                    />
+                </>
+            ) : (
+                <div className=".auth-wrapper">
+                    <div className="auth-page">
+                        <div className={"container " + (authForm === "signUp" ? "right-panel-active" : "")} id="container">
+                            <SignUpForm />
+                            <SignInForm />
+                            <div className="overlay-container">
+                                <div className="overlay">
+                                    <div className="overlay-panel overlay-left">
+                                        <h1>Welcome Back!</h1>
+                                        <p>
+                                            We saved all your stuff for you.
+                                        </p>
+                                        <button
+                                            className="ghost"
+                                            id="signIn"
+                                            onClick={() => handleAuthForm("signIn")}
+                                        >
+                                            Sign In
+                                        </button>
+                                    </div>
+                                    <div className="overlay-panel overlay-right">
+                                        <h1>Hello, Student!</h1>
+                                        <p>Just enter your email and choose a password to get started</p>
+                                        <button
+                                            className="ghost "
+                                            id="signUp"
+                                            onClick={() => handleAuthForm("signUp")}
+                                        >
+                                            Sign Up
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-              </div>
-          </div>
-        )}
-    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
