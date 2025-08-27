@@ -2,9 +2,23 @@ import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { HistoryItem } from "../utils/api";
 import { transformHistory, TransformedHistoryItem } from "../utils/fromAPI/transformHistory";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faCopy,
+  faCheck,
+  faUser,
+  faRobot,
+  faSearch,
+  faInfoCircle,
+  faChevronDown,
+  faChevronUp,
+  faExternalLinkAlt,
+  faComments
+} from '@fortawesome/free-solid-svg-icons';
+import './HistoryDisplay.css';
 
 
 // Interface for CodeBlock props
@@ -13,66 +27,53 @@ interface CodeBlockProps {
     value: string;
 }
 const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
-    const [isHovered, setIsHovered] = useState(false);
-    const [buttonText, setButtonText] = useState("Copy");
+    const [isCopied, setIsCopied] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(false);
 
-    const handleCopyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text)
-            .then(() => {
-                setButtonText("Copied!");
-                setTimeout(() => {
-                    setButtonText("Copy");
-                }, 2000);
-            })
-            .catch(err => {
-                console.error("Failed to copy: ", err);
-            });
+    const handleCopyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setIsCopied(true);
+            setTimeout(() => {
+                setIsCopied(false);
+            }, 2000);
+        } catch (err) {
+            console.error("Failed to copy: ", err);
+        }
     };
 
-
     return (
-        <div style={{ position: "relative" }}>
-            <SyntaxHighlighter style={dracula} language={language} PreTag="div">
-                {value}
-            </SyntaxHighlighter>
-            <div
-                style={{
-                    position: "absolute",
-                    top: "45px",
-                    right: "30px",
-                    cursor: "pointer",
-                    fontSize: "1.2em",
-                    color: "white",
-                    transition: "transform 0.2s ease",
-                    transform: isHovered ? "scale(1.1)" : "scale(1)",
-                }}
-                onClick={() => handleCopyToClipboard(value)}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-clipboard" viewBox="0 0 16 16">
-                    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-                    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-                </svg>
-                {isHovered && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: "-140%",
-                            left: "80%",
-                            transform: "translateX(-70%)",
-                            backgroundColor: "rgba(0, 0, 0, 0.8)",
-                            color: "white",
-                            padding: "3px 8px",
-                            borderRadius: "4px",
-                            fontSize: "0.8em",
-                            whiteSpace: "nowrap"
-                        }}
-                    >
-                        {buttonText}
+        <div className="code-block-container">
+            <div className="code-block-header">
+                <span className="code-language">{language}</span>
+                <button
+                    className={`copy-button ${isCopied ? 'copied' : ''}`}
+                    onClick={() => handleCopyToClipboard(value)}
+                    onMouseEnter={() => setShowTooltip(true)}
+                    onMouseLeave={() => setShowTooltip(false)}
+                    title={isCopied ? "Copied!" : "Copy code"}
+                >
+                    <FontAwesomeIcon icon={isCopied ? faCheck : faCopy} />
+                    {isCopied ? "Copied" : "Copy"}
+                </button>
+                {showTooltip && !isCopied && (
+                    <div className="copy-tooltip">
+                        Copy to clipboard
                     </div>
                 )}
             </div>
+            <SyntaxHighlighter 
+                style={oneDark} 
+                language={language} 
+                PreTag="div"
+                customStyle={{
+                    margin: 0,
+                    borderRadius: 0,
+                    background: 'var(--gray-800)',
+                }}
+            >
+                {value}
+            </SyntaxHighlighter>
         </div>
     );
 };
@@ -89,148 +90,113 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
     const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
     const [expanded, setExpanded] = useState(false);
 
-    // Determine score color based on score value
-    const scoreColor =
-        (score ?? 0) >= 90 ? "#28a745" :
-            (score ?? 0) >= 70 ? "#ffc107" :
-                (score ?? 0) >= 50 ? "#fd7e14" :
-                    "#dc3545";
+    // Determine metric classes based on values
+    const getScoreClass = (score: number) => {
+        if (score >= 90) return 'excellent';
+        if (score >= 70) return 'good';
+        if (score >= 50) return 'fair';
+        return 'poor';
+    };
 
-    // Determine confidence color based on confidence value
-    const confidenceColor =
-        (confidence ?? 0) >= 90 ? "#28a745" :
-            (confidence ?? 0) >= 70 ? "#ffc107" :
-                "#dc3545";
+    const getConfidenceClass = (confidence: number) => {
+        if (confidence >= 90) return 'excellent';
+        if (confidence >= 70) return 'good';
+        return 'fair';
+    };
 
+    const getSenderInfo = (sender: string) => {
+        switch (sender) {
+            case 'user':
+                return { name: 'You', avatar: 'U', class: 'user' };
+            case 'openai':
+                return { name: 'AI (OpenAI)', avatar: 'AI', class: 'openai' };
+            case 'gemini':
+                return { name: 'AI (Gemini)', avatar: 'AI', class: 'gemini' };
+            default:
+                return { name: 'Unknown', avatar: '?', class: 'user' };
+        }
+    };
 
-    const maxLines = 5;
-    const lineHeight = 20;
-    const maxHeight = maxLines * lineHeight;
+    const senderInfo = getSenderInfo(sender);
+    const isLongMessage = message.split('\n').length > 8 || message.length > 800;
 
 
     return (
-        <div
-            className="history-item"
-            style={{
-                marginBottom: "10px",
-                padding: "5px",
-                borderRadius: "5px",
-                backgroundColor: sender === "user" ? "#f0f8ff" : "#f9f9f9",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-            }}
-        >
-            <div style={{ display: "flex", alignItems: "center" }}>
-                <strong style={{ color: sender === "user" ? "#007BFF" : "#28a745" }}>
-                    {sender === "user" ? "User" : (sender === "openai" ? "AI (OpenAI)" : "AI (Gemini)")} <span style={{ fontWeight: "normal" }}>({formattedTime})</span>
-                </strong>
-                {sender === "user" && score !== undefined && (
-                    <div style={{ marginLeft: "10px", display: "flex", alignItems: "center" }}>
-                        <span
-                            style={{
-                                fontWeight: "bold",
-                                fontSize: "1.1em",
-                                color: scoreColor,
-                                fontFamily: "Arial, sans-serif",
-                            }}
-                        >
-                            Score: {score}%
-                        </span>
-                        <div
-                            style={{ marginLeft: "5px", cursor: "pointer", position: "relative" }}
-                            onMouseEnter={() => setHoveredInfo("feedback")}
-                            onMouseLeave={() => setHoveredInfo(null)}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-info-circle" viewBox="0 0 16 16">
-                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
-                            </svg>
-                            {hoveredInfo === "feedback" && (
-                                <div
-                                    style={{
-                                        position: "absolute", // Keeps it relative to the parent
-                                        top: "25px", // Adjust the position
-                                        left: "0", // Align with the info icon
-                                        backgroundColor: "white", // Ensure visibility
-                                        border: "1px solid #ccc", // Optional border for clarity
-                                        padding: "15px",
-                                        borderRadius: "5px",
-                                        zIndex: 9999, // High z-index to place it on top
-                                        width: "300px", // Define the width to prevent layout shifts
-                                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Add a shadow for better visibility
-                                        overflow: "hidden", // Prevent internal scrolls
-                                        whiteSpace: "normal", // Prevent single-line overflow
-                                    }}
-                                >
-                                    {feedback}
-                                </div>
-)}
-                            {promptSummary && (
-                                <span style={{ marginLeft: "10px", fontStyle: "italic" }}>
-                                    {promptSummary}
-                                </span>
-                            )}
+        <div className={`history-item ${sender}-message ${senderInfo.class}`}>
+            <div className="message-header">
+                <div className="sender-info">
+                    <div className={`sender-avatar ${senderInfo.class}`}>
+                        {senderInfo.avatar}
+                    </div>
+                    <div>
+                        <div className={`sender-name ${senderInfo.class}`}>
+                            {senderInfo.name}
+                        </div>
+                        <div className="message-timestamp">
+                            {formattedTime}
                         </div>
                     </div>
-                )}
-                {(sender === "openai" || sender === "gemini") && confidence !== undefined && (
-                    <div style={{ marginLeft: "10px", display: "flex", alignItems: "center" }}>
-                        <span
-                            style={{
-                                fontWeight: "bold",
-                                fontSize: "1.1em",
-                                color: confidenceColor,
-                                fontFamily: "Arial, sans-serif",
-                            }}
-                        >
-                            Confidence: {confidence}%
-                        </span>
-                        <div
-                            style={{ marginLeft: "5px", cursor: "pointer", position: "relative" }}
-                            onMouseEnter={() => setHoveredInfo("concerns")}
-                            onMouseLeave={() => setHoveredInfo(null)}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-info-circle" viewBox="0 0 16 16">
-                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
-                            </svg>
-                            {hoveredInfo === "concerns" && (
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        top: "20px",
-                                        left: "0",
-                                        backgroundColor: "white",
-                                        border: "1px solid #ccc",
-                                        padding: "15px",
-                                        borderRadius: "5px",
-                                        zIndex: 10,
-                                        width: "300px",
-                                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                                    }}
-                                >
-                                    {concerns}
+                </div>
+
+                <div className="message-metrics">
+                    {/* User Score */}
+                    {sender === "user" && score !== undefined && (
+                        <div className="metric-item">
+                            <div className={`metric-score ${getScoreClass(score)}`}>
+                                Score: {score}%
+                            </div>
+                            {feedback && (
+                                <div className="info-icon-wrapper">
+                                    <FontAwesomeIcon 
+                                        icon={faInfoCircle} 
+                                        className="info-icon"
+                                        onMouseEnter={() => setHoveredInfo("feedback")}
+                                        onMouseLeave={() => setHoveredInfo(null)}
+                                    />
+                                    {hoveredInfo === "feedback" && (
+                                        <div className="metric-tooltip">
+                                            {feedback}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    {/* AI Confidence */}
+                    {(sender === "openai" || sender === "gemini") && confidence !== undefined && (
+                        <div className="metric-item">
+                            <div className={`metric-score ${getConfidenceClass(confidence)}`}>
+                                Confidence: {confidence}%
+                            </div>
+                            {concerns && (
+                                <div className="info-icon-wrapper">
+                                    <FontAwesomeIcon 
+                                        icon={faInfoCircle} 
+                                        className="info-icon"
+                                        onMouseEnter={() => setHoveredInfo("concerns")}
+                                        onMouseLeave={() => setHoveredInfo(null)}
+                                    />
+                                    {hoveredInfo === "concerns" && (
+                                        <div className="metric-tooltip">
+                                            {concerns}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Prompt Summary */}
+                    {promptSummary && (
+                        <div className="prompt-summary">
+                            {promptSummary}
+                        </div>
+                    )}
+                </div>
             </div>
-            <div
-                style={{
-                    marginTop: "5px",
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    backgroundColor: "#f4f4f4",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    fontFamily: "monospace",
-                    maxHeight: sender === "user" && !expanded ? `${maxHeight}px` : "none",
-                    overflow: sender === "user" && !expanded ? "hidden" : "visible",
-                    position: "relative",
-                }}
-            >
+
+            <div className={`message-content ${isLongMessage && !expanded ? 'expandable' : ''} ${expanded ? 'expanded' : ''}`}>
                 <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
@@ -249,31 +215,16 @@ const HistoryItemDisplay: React.FC<HistoryItem & { sessionId: string; index: num
                     {message}
                 </ReactMarkdown>
 
-                {!expanded && sender === "user" && message.split("\n").length > maxLines && (
-                    <span
-                        style={{
-                            position: "absolute",
-                            bottom: "0px",
-                            left: "80%",
-                            fontSize: "0.8em",
-                            cursor: "pointer",
-                            backgroundColor: "rgba(255, 255, 255, 0.8)",
-                            padding: "3px 8px",
-                            borderRadius: "4px",
-                        }}
-                        onClick={() => setExpanded(!expanded)}
-                    >
-                        ... See More
-                    </span>
+                {isLongMessage && !expanded && (
+                    <button className="expand-button" onClick={() => setExpanded(true)}>
+                        <FontAwesomeIcon icon={faChevronDown} /> Show More
+                    </button>
                 )}
             </div>
 
-            {expanded && sender === "user" && message.split("\n").length > maxLines && (
-                <button
-                    onClick={() => setExpanded(!expanded)}
-                    style={{ marginTop: "5px", fontSize: "0.8em", padding: "3px 8px", borderRadius: "4px" }}
-                >
-                    Show Less
+            {expanded && isLongMessage && (
+                <button className="collapse-button" onClick={() => setExpanded(false)}>
+                    <FontAwesomeIcon icon={faChevronUp} /> Show Less
                 </button>
             )}
         </div>
@@ -303,19 +254,22 @@ const HistoryBundleDisplay: React.FC<TransformedHistoryItem & { sessionId: strin
             className={`tab-button ${activeTab === 'openai' ? 'active' : ''}`}
             onClick={() => setActiveTab('openai')}
           >
+            <FontAwesomeIcon icon={faRobot} className="tab-icon" />
             OpenAI
           </button>
           <button
             className={`tab-button ${activeTab === 'gemini' ? 'active' : ''}`}
             onClick={() => setActiveTab('gemini')}
           >
+            <FontAwesomeIcon icon={faRobot} className="tab-icon" />
             Gemini
           </button>
           <button
             className={`tab-button ${activeTab === 'search' ? 'active' : ''}`}
             onClick={() => setActiveTab('search')}
           >
-            Google Search
+            <FontAwesomeIcon icon={faSearch} className="tab-icon" />
+            Search Results
           </button>
         </div>
 
@@ -328,61 +282,50 @@ const HistoryBundleDisplay: React.FC<TransformedHistoryItem & { sessionId: strin
             <HistoryItemDisplay {...responses.gemini} sessionId={sessionId} index={index} />
           )}
           {activeTab === 'search' && responses.search && (
-  <div>
-    <strong>Search Results:</strong>
-    <ul>
-    {activeTab === 'search' && responses.search && (
-        <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
-            <strong style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '10px' }}>Search Results:</strong>
-            <ul style={{ listStyleType: 'none', padding: '0' }}>
-            {responses.search.message
-                .split('\n\n') // Split by double newlines to separate results
-                .map((resultBlock, idx) => {
-                const titleMatch = resultBlock.match(/Title:\s*(.+)/);
-                const linkMatch = resultBlock.match(/Link:\s*(https?:\/\/\S+)/);
-                const descriptionMatch = resultBlock.match(/Description:\s*(.+)/);
-                const sourceMatch = resultBlock.match(/Source:\s*(\S+)/); // Extract the source
+            <div className="search-results">
+              <h3 className="search-results-title">
+                <FontAwesomeIcon icon={faSearch} />
+                Search Results
+              </h3>
+              <ul className="search-results-list">
+                {responses.search.message
+                  .split('\n\n')
+                  .map((resultBlock, idx) => {
+                    const titleMatch = resultBlock.match(/Title:\s*(.+)/);
+                    const linkMatch = resultBlock.match(/Link:\s*(https?:\/\/\S+)/);
+                    const descriptionMatch = resultBlock.match(/Description:\s*(.+)/);
+                    const sourceMatch = resultBlock.match(/Source:\s*(\S+)/);
 
-                if (titleMatch && linkMatch) {
-                    const title = titleMatch[1].trim();
-                    const url = linkMatch[1].trim();
-                    const description = descriptionMatch ? descriptionMatch[1].trim() : "No description available.";
-                    const source = sourceMatch ? sourceMatch[1].trim() : "Unknown Source";
+                    if (titleMatch && linkMatch) {
+                      const title = titleMatch[1].trim();
+                      const url = linkMatch[1].trim();
+                      const description = descriptionMatch ? descriptionMatch[1].trim() : "No description available.";
+                      const source = sourceMatch ? sourceMatch[1].trim() : "Unknown Source";
 
-                    return (
-                    <li key={idx} style={{ marginBottom: '20px' }}>
-                        <a
-                        href={url}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                            color: '#1a73e8',
-                            textDecoration: 'none',
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            display: 'block',
-                            marginBottom: '5px'
-                        }}
-                        >
-                        {title}
-                        </a>
-                        <p style={{ color: '#4d5156', marginBottom: '5px' }}>
-                        <span style={{ color: '#70757a' }}>{source} - </span>
-                        {url}
-                        </p>
-                        <p style={{ color: '#70757a', fontSize: '14px' }}>{description}</p>
-                    </li>
-                    );
-                }
-                return null; // Skip blocks that don't match the expected format
-                })
-                .filter(Boolean)} {/* Remove null entries */}
-            </ul>
-        </div>
-    )}
-    </ul>
-  </div>
-)}
+                      return (
+                        <li key={idx} className="search-result-item">
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="search-result-title"
+                          >
+                            {title}
+                            <FontAwesomeIcon icon={faExternalLinkAlt} style={{ marginLeft: '8px', fontSize: '0.8em' }} />
+                          </a>
+                          <div className="search-result-url">
+                            <span className="search-result-source">{source}</span> - {url}
+                          </div>
+                          <p className="search-result-description">{description}</p>
+                        </li>
+                      );
+                    }
+                    return null;
+                  })
+                  .filter(Boolean)}
+              </ul>
+            </div>
+          )}
 
         </div>
       </div>
@@ -448,9 +391,19 @@ const HistoryDisplay: React.FC<HistoryDisplayProps> = ({ history, sessionId }) =
 
     return (
         <div className="history-display" ref={historyDisplayRef}>
-          {transformedHistory.map((item, index) => (
+          {transformedHistory.length === 0 ? (
+            <div className="history-empty">
+              <FontAwesomeIcon icon={faComments} className="history-empty-icon" />
+              <h2 className="history-empty-title">No conversation yet</h2>
+              <p className="history-empty-description">
+                Start a conversation with your AI tutor by typing a message or uploading a document below.
+              </p>
+            </div>
+          ) : (
+            transformedHistory.map((item, index) => (
               <HistoryBundleDisplay key={index} {...item} sessionId={sessionId} index={index} />
-          ))}
+            ))
+          )}
         </div>
     );
 };
