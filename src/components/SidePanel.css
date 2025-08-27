@@ -15,6 +15,40 @@
     width: 60px;
 }
 
+.side-panel.minimized .minimize-button {
+    right: -16px;
+}
+
+.side-panel.minimized .trust-header,
+.side-panel.minimized .panel-header,
+.side-panel.minimized .new-session-section,
+.side-panel.minimized .sessions-section,
+.side-panel.minimized .panel-footer {
+    display: none;
+}
+
+/* Add a subtle indicator for collapsed state */
+.side-panel.minimized::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ffb606 0%, #650d88 100%);
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+/* Add a subtle border glow for collapsed state */
+.side-panel.minimized {
+    border-right: 2px solid transparent;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow:
+        2px 0 20px rgba(0, 0, 0, 0.05),
+        inset -2px 0 0 rgba(255, 182, 6, 0.1);
+}
+
 /* Trust Header */
 .trust-header {
     display: flex;
@@ -58,27 +92,148 @@
 }
 
 .minimize-button {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: absolute;
+    top: 50%;
+    right: -15px;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #ffb606 0%, #650d88 100%);
+    border: 3px solid #ffffff;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 8px 25px rgba(255, 182, 6, 0.3),
+        0 4px 10px rgba(101, 13, 136, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    z-index: 1000;
     backdrop-filter: blur(10px);
 }
 
+/* Remove duplicate ::before - consolidated above */
+
 .minimize-button:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
+    transform: scale(1.1) translateY(-2px);
+    box-shadow:
+        0 12px 35px rgba(255, 182, 6, 0.4),
+        0 8px 20px rgba(101, 13, 136, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border-color: #ffffff;
+}
+
+.minimize-button:hover .minimize-icon {
+    transform: scale(1.1);
 }
 
 .minimize-icon {
     color: white;
-    font-size: 0.8rem;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* AI-themed pulse animation for the icon */
+.minimize-button:hover .minimize-icon {
+    animation: aiPulse 2s infinite;
+}
+
+@keyframes aiPulse {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    50% {
+        filter: drop-shadow(0 2px 8px rgba(255, 182, 6, 0.6));
+    }
+}
+
+/* Ensure the button is always clickable and visible */
+.minimize-button:focus {
+    outline: none;
+    box-shadow:
+        0 0 0 4px rgba(255, 182, 6, 0.3),
+        0 8px 25px rgba(255, 182, 6, 0.3),
+        0 4px 10px rgba(101, 13, 136, 0.2);
+}
+
+.minimize-button:active {
+    transform: scale(0.95) translateY(0);
+    transition: all 0.1s ease;
+}
+
+/* Add a subtle glow effect for the collapsed state */
+.side-panel.minimized .minimize-button {
+    background: linear-gradient(135deg, #650d88 0%, #ffb606 100%);
+    box-shadow:
+        0 8px 25px rgba(101, 13, 136, 0.4),
+        0 4px 10px rgba(255, 182, 6, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.side-panel.minimized .minimize-button:hover {
+    background: linear-gradient(135deg, #ffb606 0%, #650d88 100%);
+}
+
+/* Add a subtle tooltip effect */
+.minimize-button::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1001;
+}
+
+.minimize-button:hover::after {
+    opacity: 1;
+}
+
+/* Add a subtle AI-themed glow ring */
+.minimize-button::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: conic-gradient(from 0deg, #ffb606, #650d88, #ffb606, #650d88);
+    border-radius: 50%;
+    z-index: -2;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.minimize-button:hover::before {
+    opacity: 0.3;
 }
 
 /* Panel Header */

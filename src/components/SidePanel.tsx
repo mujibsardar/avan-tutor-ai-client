@@ -235,12 +235,19 @@ function SidePanel({
             <span>AWS Secure</span>
           </div>
         </div>
-        <div className="minimize-button" onClick={() => setIsMinimized(!isMinimized)}>
-          <FontAwesomeIcon
-            icon={isMinimized ? faChevronRight : faChevronLeft}
-            className="minimize-icon"
-          />
-        </div>
+      </div>
+
+      {/* Minimize Button - Always Visible */}
+      <div
+        className="minimize-button"
+        onClick={() => setIsMinimized(!isMinimized)}
+        data-tooltip={isMinimized ? "Expand AI Tutor Panel" : "Collapse AI Tutor Panel"}
+        title={isMinimized ? "Expand AI Tutor Panel" : "Collapse AI Tutor Panel"}
+      >
+        <FontAwesomeIcon
+          icon={isMinimized ? faChevronRight : faChevronLeft}
+          className="minimize-icon"
+        />
       </div>
 
       {!isMinimized && (
@@ -250,22 +257,22 @@ function SidePanel({
             <div className="header-icon">
               <FontAwesomeIcon icon={faBrain} className="brain-icon" />
             </div>
-            <h1 className="panel-title">AI Tutoring Hub</h1>
-            <p className="panel-subtitle">Your personalized learning journey</p>
+            <h1 className="panel-title">AI Prompt Tutor</h1>
+            <p className="panel-subtitle">Master AI interactions & prompt engineering</p>
           </div>
 
           {/* New Session Section */}
           <div className="new-session-section">
             <h2 className="section-title">
               <FontAwesomeIcon icon={faPlus} className="section-icon" />
-              Start New Session
+              Start New AI Session
             </h2>
             <div className="new-session-form">
               <input
                 type="text"
                 value={newSessionName}
                 onChange={(e) => setNewSessionName(e.target.value)}
-                placeholder="Enter session name..."
+                placeholder="Enter AI prompt session name..."
                 className="session-input"
                 onKeyPress={(e) => e.key === 'Enter' && handleNewSessionSubmit()}
                 disabled={isCreatingSession}
@@ -283,7 +290,7 @@ function SidePanel({
                 ) : (
                   <>
                     <FontAwesomeIcon icon={faPlus} />
-                    Create Session
+                    Start AI Session
                   </>
                 )}
               </button>
@@ -300,7 +307,7 @@ function SidePanel({
           <div className="sessions-section">
             <h2 className="section-title">
               <FontAwesomeIcon icon={faHistory} className="section-icon" />
-              Learning Sessions
+              AI Prompt Sessions
             </h2>
 
             {loadingSessions ? (
@@ -308,8 +315,8 @@ function SidePanel({
             ) : sessions.length === 0 ? (
               <div className="empty-state">
                 <FontAwesomeIcon icon={faUserGraduate} className="empty-icon" />
-                <p>No sessions yet</p>
-                <span>Create your first session to get started!</span>
+                <p>No AI sessions yet</p>
+                <span>Start your first AI prompt session to begin learning!</span>
               </div>
             ) : (
               <div className="sessions-list">
@@ -338,11 +345,11 @@ function SidePanel({
               </div>
               <div className="trust-item">
                 <FontAwesomeIcon icon={faShieldAlt} className="trust-icon" />
-                <span>Data Protected</span>
+                <span>AI-Safe & Secure</span>
               </div>
             </div>
             <div className="version-info">
-              v1.0.0 • Powered by AWS
+              v1.0.0 • AI Prompt Tutor • Powered by AWS
             </div>
           </div>
         </>
