@@ -1,8 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { NewSessionResponse } from "../utils/api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faChevronLeft, faChevronRight, faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import {
+  faTrash,
+  faChevronLeft,
+  faChevronRight,
+  faChevronUp,
+  faChevronDown,
+  faShieldAlt,
+  faLock,
+  faPlus,
+  faHistory,
+  faCalendarAlt,
+  faUserGraduate,
+  faBrain,
+  faCheckCircle,
+  faExclamationTriangle
+} from '@fortawesome/free-solid-svg-icons';
 import { transformHistory } from "../utils/fromAPI/transformHistory";
+import './SidePanel.css';
 
 interface SidePanelProps {
   sessions: NewSessionResponse[];
@@ -13,10 +29,19 @@ interface SidePanelProps {
   loadingSessions: boolean;
 }
 
-function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDeleteSession, loadingSessions }: SidePanelProps) {
+function SidePanel({
+  sessions,
+  activeSession,
+  onNewSession,
+  onSessionClick,
+  onDeleteSession,
+  loadingSessions
+}: SidePanelProps) {
   const [newSessionName, setNewSessionName] = useState<string>("");
   const [isMinimized, setIsMinimized] = useState(false);
   const [showPromptSummaries, setShowPromptSummaries] = useState<{ [sessionId: string]: boolean }>({});
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Ensure active session highlight updates correctly
   useEffect(() => {
@@ -25,22 +50,39 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDe
     }
   }, [activeSession]);
 
-  const handleNewSessionSubmit = () => {
-    if (newSessionName.trim()) {
-      onNewSession(newSessionName);
-      setNewSessionName("");
-    }
-  };
+  const handleNewSessionSubmit = useCallback(async () => {
+    if (!newSessionName.trim()) return;
 
-  const handleToggleSummaries = (sessionId: string) => {
+    setIsCreatingSession(true);
+    setError(null);
+
+    try {
+      await onNewSession(newSessionName);
+      setNewSessionName("");
+      // Show success feedback
+      setTimeout(() => {
+        setIsCreatingSession(false);
+      }, 1000);
+    } catch (err) {
+      setError("Failed to create session. Please try again.");
+      setIsCreatingSession(false);
+    }
+  }, [newSessionName, onNewSession]);
+
+  const handleToggleSummaries = useCallback((sessionId: string) => {
     setShowPromptSummaries(prevState => ({
       ...prevState,
       [sessionId]: !prevState[sessionId]
     }));
-  };
+  }, []);
 
+  const handleDeleteSession = useCallback((sessionId: string, sessionName: string) => {
+    if (window.confirm(`Are you sure you want to delete "${sessionName}"? This action cannot be undone.`)) {
+      onDeleteSession(sessionId);
+    }
+  }, [onDeleteSession]);
 
-    // Sort sessions based on modifiedAt or createdAt, newest first
+  // Sort sessions based on modifiedAt or createdAt, newest first
   const sortedSessions = [...sessions].sort((a, b) => {
     const dateA = a.modifiedAt ? new Date(a.modifiedAt) : new Date(a.createdAt);
     const dateB = b.modifiedAt ? new Date(b.modifiedAt) : new Date(b.createdAt);
@@ -48,196 +90,260 @@ function SidePanel({ sessions, activeSession, onNewSession, onSessionClick, onDe
   });
 
   // Function to group sessions by date categories
-    const groupSessionsByDate = () => {
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 1);
-        const sevenDaysAgo = new Date(today);
-        sevenDaysAgo.setDate(today.getDate() - 7);
-        const thirtyDaysAgo = new Date(today);
-        thirtyDaysAgo.setDate(today.getDate() - 30);
+  const groupSessionsByDate = useCallback(() => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
 
-        const grouped: { [key: string]: NewSessionResponse[] } = {
-            "Today": [],
-            "Yesterday": [],
-            "Previous 7 Days": [],
-             "Previous 30 Days": [],
-              "Older": [],
-        };
-
-
-        sortedSessions.forEach((session) => {
-          const sessionDate = session.modifiedAt ? new Date(session.modifiedAt) : new Date(session.createdAt)
-           if (sessionDate.toDateString() === today.toDateString()) {
-                grouped["Today"].push(session);
-             } else if (sessionDate.toDateString() === yesterday.toDateString()) {
-                grouped["Yesterday"].push(session);
-            } else if (sessionDate >= sevenDaysAgo) {
-                grouped["Previous 7 Days"].push(session);
-            } else if (sessionDate >= thirtyDaysAgo) {
-                 grouped["Previous 30 Days"].push(session);
-            }
-            else {
-                 grouped["Older"].push(session);
-            }
-
-        });
-
-         // Remove empty groups
-       const filteredGroups = Object.fromEntries(
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          Object.entries(grouped).filter(([_, sessions]) => sessions.length > 0)
-         );
-
-       return filteredGroups;
+    const grouped: { [key: string]: NewSessionResponse[] } = {
+      "Today": [],
+      "Yesterday": [],
+      "Previous 7 Days": [],
+      "Previous 30 Days": [],
+      "Older": [],
     };
 
-    const groupedSessions = groupSessionsByDate();
+    sortedSessions.forEach((session) => {
+      const sessionDate = session.modifiedAt ? new Date(session.modifiedAt) : new Date(session.createdAt);
+      if (sessionDate.toDateString() === today.toDateString()) {
+        grouped["Today"].push(session);
+      } else if (sessionDate.toDateString() === yesterday.toDateString()) {
+        grouped["Yesterday"].push(session);
+      } else if (sessionDate >= sevenDaysAgo) {
+        grouped["Previous 7 Days"].push(session);
+      } else if (sessionDate >= thirtyDaysAgo) {
+        grouped["Previous 30 Days"].push(session);
+      } else {
+        grouped["Older"].push(session);
+      }
+    });
 
-    const renderSessionList = (sessions: NewSessionResponse[]) => {
-      return sessions.map((session) => (
-         <li key={session.sessionId}
-                  style={{
-                    marginBottom: "5px",
-                  }}
-                  className={activeSession?.sessionId === session.sessionId ? "active" : ""}
-                >
-                  <div
-                    onClick={() => onSessionClick(session)}
-                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
-                 >
-                    {session.sessionName}
-                    <button
+    // Remove empty groups
+    const filteredGroups = Object.fromEntries(
+      Object.entries(grouped).filter(([_, sessions]) => sessions.length > 0)
+    );
+
+    return filteredGroups;
+  }, [sortedSessions]);
+
+  const groupedSessions = groupSessionsByDate();
+
+  const renderSessionList = useCallback((sessions: NewSessionResponse[]) => {
+    return sessions.map((session) => (
+      <li
+        key={session.sessionId}
+        className={`session-item ${activeSession?.sessionId === session.sessionId ? 'active' : ''}`}
+        onClick={() => onSessionClick(session)}
+      >
+        <div className="session-header">
+          <div className="session-info">
+            <span className="session-name">{session.sessionName}</span>
+            <span className="session-date">
+              {new Date(session.modifiedAt || session.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+          <button
+            className="delete-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteSession(session.sessionId, session.sessionName);
+            }}
+            title="Delete session"
+            aria-label={`Delete session: ${session.sessionName}`}
+          >
+            <FontAwesomeIcon icon={faTrash} />
+          </button>
+        </div>
+
+        {session.history.some(item => item.sender === "user" && item.promptSummary) && (
+          <div className="session-summaries">
+            <button
+              className="toggle-summaries-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleSummaries(session.sessionId);
+              }}
+              aria-expanded={showPromptSummaries[session.sessionId] ?? true}
+              aria-label="Toggle prompt summaries"
+            >
+              <FontAwesomeIcon
+                icon={(showPromptSummaries[session.sessionId] ?? true) ? faChevronUp : faChevronDown}
+                className="toggle-icon"
+              />
+              <span>Prompt History</span>
+            </button>
+
+            {(showPromptSummaries[session.sessionId] ?? true) && (
+              <ul className="summaries-list">
+                {transformHistory(session.history).map((item, index) => (
+                  <li key={index} className="summary-item">
+                    <a
+                      href={`#prompt-${session.sessionId}-${index}`}
                       onClick={(e) => {
-                        e.stopPropagation();
-                        if (window.confirm("Are you sure you want to delete this session?")) {
-                          onDeleteSession(session.sessionId);
-                        }
+                        e.preventDefault();
+                        onSessionClick(session);
+                        setTimeout(() => {
+                          const element = document.getElementById(`prompt-${session.sessionId}-${index}`);
+                          if (element) {
+                            element.scrollIntoView({ behavior: "smooth" });
+                          }
+                        }, 100);
                       }}
-                      style={{
-                        marginLeft: "5px",
-                        padding: "5px",
-                        border: "none",
-                        color: "grey",
-                        cursor: "pointer",
-                        backgroundColor: "transparent",
-                      }}
+                      className="summary-link"
+                      title={item.prompt.promptSummary}
                     >
-                       <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  </div>
-                  {session.history.some(item => item.sender === "user" && item.promptSummary) && (
-                    <>
-                      <span
-                        onClick={() => handleToggleSummaries(session.sessionId)}
-                        style={{
-                          marginLeft: "10px",
-                          fontSize: "0.8em",
-                          cursor: "pointer",
-                          display: "inline-flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <FontAwesomeIcon
-                          icon={(showPromptSummaries[session.sessionId] ?? true) ? faChevronUp : faChevronDown}
-                          style={{
-                            fontSize: "1rem",
-                            color: "#555",
-                            cursor: "pointer",
-                            transition: "color 0.3s ease",
-                          }}
-                          onMouseEnter={(e) => (e.currentTarget.style.color = "#007BFF")}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = "#555")}
-                        />
-                      </span>
-                      {(showPromptSummaries[session.sessionId] ?? true) && (
-                        <ul style={{ listStyleType: "none", padding: 0 }}>
-                          {transformHistory(session.history).map((item, index) => (
-                              <li key={index} style={{ marginLeft: "15px", cursor: "pointer" }}>
-                                <a
-                                  href={`#prompt-${session.sessionId}-${index}`}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    onSessionClick(session);
-                                    setTimeout(() => {
-                                      const element = document.getElementById(`prompt-${session.sessionId}-${index}`);
-                                      if (element) {
-                                        element.scrollIntoView({ behavior: "smooth" });
-                                      }
-                                    }, 100);
-                                  }}
-                                  style={{
-                                    color: "gray",
-                                    textDecoration: "none",
-                                    fontSize: "0.9em",
-                                  }}
-                                >
-                                  - {item.prompt.promptSummary && item.prompt.promptSummary.length > 30 ? item.prompt.promptSummary.substring(0, 30) + "..." : item.prompt.promptSummary}
-                                </a>
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      )}
-                    </>
-                  )}
-                </li>
-      ));
-    }
+                      {item.prompt.promptSummary && item.prompt.promptSummary.length > 40
+                        ? item.prompt.promptSummary.substring(0, 40) + "..."
+                        : item.prompt.promptSummary}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </li>
+    ));
+  }, [activeSession, showPromptSummaries, handleToggleSummaries, handleDeleteSession, onSessionClick]);
+
+  const renderLoadingSkeleton = () => (
+    <div className="loading-skeleton">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="skeleton-item">
+          <div className="skeleton-line skeleton-title"></div>
+          <div className="skeleton-line skeleton-subtitle"></div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="side-panel" style={{ width: isMinimized ? '50px' : '20%', overflowY: "auto" }}>
-      <div
-        className="minimize-button"
-        onClick={() => setIsMinimized(!isMinimized)}
-        style={{
-          position: "absolute",
-          top: "50%",
-          right: isMinimized ? "95.5%" : "78.5%",
-          transform: "translateY(-50%)",
-          backgroundColor: "#f9f9f9",
-          border: "1px solid #ccc",
-          borderRadius: "50%",
-          padding: "15px",
-          cursor: "pointer",
-        }}
-      >
-        {isMinimized ? (
-          <FontAwesomeIcon icon={faChevronRight} />
-        ) : (
-          <FontAwesomeIcon icon={faChevronLeft} />
-        )}
+    <div className={`side-panel ${isMinimized ? 'minimized' : ''}`}>
+      {/* Trust & Security Header */}
+      <div className="trust-header">
+        <div className="security-badges">
+          <div className="security-badge" title="End-to-end encryption">
+            <FontAwesomeIcon icon={faLock} className="security-icon" />
+            <span>Encrypted</span>
+          </div>
+          <div className="security-badge" title="Secure AWS infrastructure">
+            <FontAwesomeIcon icon={faShieldAlt} className="security-icon" />
+            <span>AWS Secure</span>
+          </div>
+        </div>
+        <div className="minimize-button" onClick={() => setIsMinimized(!isMinimized)}>
+          <FontAwesomeIcon
+            icon={isMinimized ? faChevronRight : faChevronLeft}
+            className="minimize-icon"
+          />
+        </div>
       </div>
+
       {!isMinimized && (
         <>
-          <h2>Tutoring Log</h2>
-          <div className="new-session">
-            <input
-              type="text"
-              value={newSessionName}
-              onChange={(e) => setNewSessionName(e.target.value)}
-              placeholder="New session name"
-            />
-            <button onClick={handleNewSessionSubmit}>Start Session</button>
+          {/* Header Section */}
+          <div className="panel-header">
+            <div className="header-icon">
+              <FontAwesomeIcon icon={faBrain} className="brain-icon" />
+            </div>
+            <h1 className="panel-title">AI Tutoring Hub</h1>
+            <p className="panel-subtitle">Your personalized learning journey</p>
           </div>
-          <div className="sessions-list">
-            <h3>Sessions</h3>
-             {loadingSessions ? (
-                   <ul>
-                 { Array.from({ length: 3 }).map((_, index) => (
-                   <li key={index} className="placeholder-session" style={{marginBottom: "5px", backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px'}}>
-                     <div style={{height: '20px', width: '80%', backgroundColor: 'lightgrey', borderRadius: '4px'}}></div>
-                    </li>
-                  ))}
-                </ul>
-            ) : Object.entries(groupedSessions).map(([category, sessions]) => (
-                <div key={category}>
-                   <h4>{category}</h4>
-                    <ul>
-                      {renderSessionList(sessions)}
-                  </ul>
-             </div>
-           ))}
+
+          {/* New Session Section */}
+          <div className="new-session-section">
+            <h2 className="section-title">
+              <FontAwesomeIcon icon={faPlus} className="section-icon" />
+              Start New Session
+            </h2>
+            <div className="new-session-form">
+              <input
+                type="text"
+                value={newSessionName}
+                onChange={(e) => setNewSessionName(e.target.value)}
+                placeholder="Enter session name..."
+                className="session-input"
+                onKeyPress={(e) => e.key === 'Enter' && handleNewSessionSubmit()}
+                disabled={isCreatingSession}
+              />
+              <button
+                onClick={handleNewSessionSubmit}
+                className={`create-btn ${isCreatingSession ? 'creating' : ''}`}
+                disabled={!newSessionName.trim() || isCreatingSession}
+              >
+                {isCreatingSession ? (
+                  <>
+                    <div className="spinner"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faPlus} />
+                    Create Session
+                  </>
+                )}
+              </button>
+            </div>
+            {error && (
+              <div className="error-message">
+                <FontAwesomeIcon icon={faExclamationTriangle} />
+                {error}
+              </div>
+            )}
+          </div>
+
+          {/* Sessions List Section */}
+          <div className="sessions-section">
+            <h2 className="section-title">
+              <FontAwesomeIcon icon={faHistory} className="section-icon" />
+              Learning Sessions
+            </h2>
+
+            {loadingSessions ? (
+              renderLoadingSkeleton()
+            ) : sessions.length === 0 ? (
+              <div className="empty-state">
+                <FontAwesomeIcon icon={faUserGraduate} className="empty-icon" />
+                <p>No sessions yet</p>
+                <span>Create your first session to get started!</span>
+              </div>
+            ) : (
+              <div className="sessions-list">
+                {Object.entries(groupedSessions).map(([category, categorySessions]) => (
+                  <div key={category} className="session-category">
+                    <h3 className="category-title">
+                      <FontAwesomeIcon icon={faCalendarAlt} className="category-icon" />
+                      {category}
+                      <span className="session-count">({categorySessions.length})</span>
+                    </h3>
+                    <ul className="sessions-ul">
+                      {renderSessionList(categorySessions)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Footer with Trust Indicators */}
+          <div className="panel-footer">
+            <div className="trust-indicators">
+              <div className="trust-item">
+                <FontAwesomeIcon icon={faCheckCircle} className="trust-icon" />
+                <span>GDPR Compliant</span>
+              </div>
+              <div className="trust-item">
+                <FontAwesomeIcon icon={faShieldAlt} className="trust-icon" />
+                <span>Data Protected</span>
+              </div>
+            </div>
+            <div className="version-info">
+              v1.0.0 • Powered by AWS
+            </div>
           </div>
         </>
       )}
