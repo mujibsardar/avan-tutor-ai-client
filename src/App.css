@@ -36,11 +36,9 @@ body {
 /* ===== HISTORY DISPLAY ===== */
 .history-display {
   margin-bottom: 60px;
-  overflow-y: auto;
-  max-height: calc(100vh - var(--header-height) - 120px);
   padding: var(--space-4);
-  overflow-x: hidden;
   background: var(--background-secondary);
+  /* Scrolling is now handled by content-wrapper */
 }
 
 .history-item {
@@ -299,21 +297,53 @@ body {
 /* ===== SPLIT SCREEN LAYOUT ===== */
 .split-screen {
   display: flex;
-  min-height: calc(100vh - var(--header-height));
+  height: calc(100vh - var(--header-height));
   background: var(--background-secondary);
+  overflow: hidden;
+  /* Prevent body scrolling */
 }
 
+/* ===== MAIN CONTENT AREA ===== */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
-  padding: var(--space-6);
-  overflow-x: hidden;
-  overflow-y: auto;
   background: var(--background-primary);
   margin-left: var(--sidebar-width);
   transition: margin-left var(--duration-normal) var(--ease-smooth);
+  height: 100%;
+  overflow: hidden;
+  /* Prevent main content from scrolling */
+  position: relative;
+}
+
+/* Content wrapper for proper scrolling */
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-6);
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.content-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Adjust main content when sidebar is minimized */
@@ -324,6 +354,9 @@ body:has(.side-panel.minimized) .main-content {
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
+  }
+
+  .content-wrapper {
     padding: var(--space-4);
   }
 }
@@ -451,6 +484,38 @@ body:has(.side-panel.minimized) .main-content {
   margin-bottom: var(--space-4);
 }
 
+/* ===== OUTPUT SECTION ===== */
+.output-section {
+  padding: var(--space-6);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-primary);
+  margin-bottom: var(--space-4);
+}
+
+.output-section p {
+  margin: 0;
+  color: var(--text-primary);
+  line-height: var(--leading-relaxed);
+  font-size: var(--text-base);
+}
+
+/* ===== LOADING STATES ===== */
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
 .input-caption {
   font-size: var(--text-sm);
   color: var(--text-secondary);
@@ -562,23 +627,49 @@ body:has(.side-panel.minimized) .main-content {
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 768px) {
-  .input-actions {
+@media (max-width: 1024px) {
+  .split-screen {
     flex-direction: column;
-    align-items: stretch;
   }
-  
-  .input-actions input[type="file"],
-  .input-actions button {
+
+  .side-panel {
     width: 100%;
-    margin: var(--space-1) 0;
+    height: auto;
+    max-height: 300px;
+    order: 1;
   }
-  
-  .tabs {
-    flex-wrap: wrap;
+
+  .main-content {
+    margin-left: 0;
+    order: 2;
+    flex: 1;
   }
-  
-  .tab-button {
-    min-width: 120px;
+
+  .bottom-panel {
+    order: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .split-screen {
+    height: calc(100vh - var(--header-height) - 60px);
+  }
+
+  .content-wrapper {
+    padding: var(--space-4);
+  }
+
+  .side-panel {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .split-screen {
+    height: calc(100vh - var(--header-height) - 80px);
+  }
+
+  .content-wrapper {
+    padding: var(--space-3);
   }
 }

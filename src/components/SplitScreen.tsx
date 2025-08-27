@@ -33,22 +33,22 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
         }
     }, [sessions]);
 
-     // Function to sort sessions
+    // Function to sort sessions
     const sortSessions = (sessionsToSort: NewSessionResponse[]) => {
-      const sorted = [...sessionsToSort].sort((a, b) => {
-        const dateA = a.modifiedAt ? new Date(a.modifiedAt) : new Date(a.createdAt);
-        const dateB = b.modifiedAt ? new Date(b.modifiedAt) : new Date(b.createdAt);
-        return dateB.getTime() - dateA.getTime();
+        const sorted = [...sessionsToSort].sort((a, b) => {
+            const dateA = a.modifiedAt ? new Date(a.modifiedAt) : new Date(a.createdAt);
+            const dateB = b.modifiedAt ? new Date(b.modifiedAt) : new Date(b.createdAt);
+            return dateB.getTime() - dateA.getTime();
         });
-    return sorted;
+        return sorted;
     }
 
     // Update the sortedSessions whenever the sessions array changes.
     useEffect(() => {
-      if (sessions) {
-        setSortedSessions(sortSessions(sessions));
-      }
-      }, [sessions]);
+        if (sessions) {
+            setSortedSessions(sortSessions(sessions));
+        }
+    }, [sessions]);
 
 
     const handleNewSession = async (sessionName: string) => {
@@ -80,19 +80,19 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
 
             const updatedHistory = aiResponse.updatedHistory;
 
-              if (activeSession) {
+            if (activeSession) {
                 const updatedActiveSession = {
-                  ...activeSession,
-                  history: updatedHistory,
+                    ...activeSession,
+                    history: updatedHistory,
                 };
                 setActiveSession(updatedActiveSession);
-                
-                 // Update the session in the sessions array.
+
+                // Update the session in the sessions array.
                 const updatedSessions = sessions.map((session) => {
                     if (session.sessionId === sessionId) {
                         return updatedActiveSession;
                     }
-                   return session;
+                    return session;
                 });
 
                 setSessions(updatedSessions);
@@ -155,7 +155,7 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
             />
             <div className="main-content">
                 {(loading || loadingNewSession) ? (
-                   <div style={{
+                    <div style={{
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -175,7 +175,7 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
                         />
                     </div>
                 ) : (
-                    <>
+                    <div className="content-wrapper">
                         {activeSession && activeSession.history && activeSession.history.length > 0 ? (
                             <HistoryDisplay history={activeSession.history} sessionId={activeSession.sessionId} />
                         ) : output && (
@@ -183,7 +183,7 @@ function SplitScreen({ sessions, setSessions, activeSession, setActiveSession, a
                                 <p>{output}</p>
                             </div>
                         )}
-                    </>
+                    </div>
                 )}
             </div>
             <BottomPanel onSend={handleSendToAI} activeSession={activeSession} />

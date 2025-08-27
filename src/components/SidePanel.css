@@ -2,17 +2,21 @@
 
 .side-panel {
     width: 20%;
+    height: 100%;
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     border-right: 1px solid #e2e8f0;
     box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow-y: auto;
     position: relative;
-    margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Prevent side panel from scrolling */
 }
 
 .side-panel.minimized {
     width: 60px;
+    overflow: hidden;
 }
 
 .side-panel.minimized .minimize-button {
@@ -387,6 +391,30 @@
 .sessions-section {
     padding: 20px;
     flex: 1;
+    overflow-y: auto;
+    /* Make sessions section scrollable */
+    overflow-x: hidden;
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.sessions-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sessions-section::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.sessions-section::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.sessions-section::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .sessions-list {
