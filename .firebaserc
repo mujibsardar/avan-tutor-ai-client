@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "avanaitutor-com"
+  },
+  "targets": {
+    "avanaitutor-com": {
+      "hosting": {
+        "avanaitutor-com": [
+          "avanaitutor-com"
+        ],
+        "avanaitutor": [
+          "avanaitutor"
+        ]
+      }
+    }
   }
 }

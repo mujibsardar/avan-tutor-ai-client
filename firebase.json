@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "avanaitutor-com",
     "public": "dist",
     "ignore": [
       "firebase.json",

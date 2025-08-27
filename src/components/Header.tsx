@@ -1,11 +1,10 @@
 import { AuthUser } from "../types";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faSignOutAlt,
   faBrain,
   faShieldAlt,
   faLock,
-  faSignOutAlt,
-  faUserCircle,
   faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 import './Header.css';

@@ -14,11 +14,10 @@ import {
 import "../auth.css";
 
 interface SignUpFormProps {
-  onAuthSuccess?: () => void;
   onSwitchToSignIn?: () => void;
 }
 
-function SignUpForm({ onAuthSuccess, onSwitchToSignIn }: SignUpFormProps) {
+function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -152,7 +151,7 @@ function SignUpForm({ onAuthSuccess, onSwitchToSignIn }: SignUpFormProps) {
           });
           setIsOtpSent(false);
           setSuccess(null);
-          
+
           // Switch to sign in form for immediate login
           if (onSwitchToSignIn) {
             onSwitchToSignIn();

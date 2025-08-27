@@ -157,7 +157,7 @@ function App() {
                 <div className="auth-wrapper">
                     <div className="auth-page">
                         <div className={"container " + (authForm === "signUp" ? "right-panel-active" : "")} id="container">
-                            <SignUpForm onAuthSuccess={handleAuthSuccess} onSwitchToSignIn={() => handleAuthForm("signIn")} />
+                            <SignUpForm onSwitchToSignIn={() => handleAuthForm("signIn")} />
                             <SignInForm onAuthSuccess={handleAuthSuccess} />
                             <div className="overlay-container">
                                 <div className="overlay">
