@@ -34,7 +34,7 @@ function SignInForm() {
         setError(null);
 
         const { email, password } = state;
-        
+
         // Basic validation
         if (!email.trim() || !password.trim()) {
             setError("Please fill in all fields");
@@ -53,11 +53,11 @@ function SignInForm() {
             console.error('Failed to sign in', error);
             if (error instanceof Error) {
                 // Improve error messages for better UX
-                const errorMessage = error.message.includes('Incorrect username or password') 
+                const errorMessage = error.message.includes('Incorrect username or password')
                     ? 'Invalid email or password. Please try again.'
                     : error.message.includes('User is not confirmed')
-                    ? 'Please check your email and confirm your account before signing in.'
-                    : error.message;
+                        ? 'Please check your email and confirm your account before signing in.'
+                        : error.message;
                 setError(errorMessage);
             } else {
                 setError('An unknown error occurred. Please try again.');
@@ -78,7 +78,7 @@ function SignInForm() {
                     <h1>Welcome Back</h1>
                     <p>Sign in to continue to your AI tutoring sessions</p>
                 </div>
-                
+
                 <div className="input-group">
                     <div className="input-wrapper">
                         <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
@@ -127,8 +127,8 @@ function SignInForm() {
                 )}
 
                 <div className="form-actions">
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         className="submit-button"
                         disabled={loading}
                     >
@@ -141,7 +141,7 @@ function SignInForm() {
                             'Sign In'
                         )}
                     </button>
-                    
+
                     <a href="#" className="forgot-password">
                         Forgot your password?
                     </a>
