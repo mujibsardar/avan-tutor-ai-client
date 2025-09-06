@@ -52,18 +52,18 @@ function SignInForm({ onAuthSuccess }: SignInFormProps) {
                 password
             });
             console.log('Signed in successfully!');
-            
+
             // Clear form
             setState({ email: "", password: "" });
-            
+
             // Notify parent component of successful authentication
             if (onAuthSuccess) {
                 onAuthSuccess();
             }
-            
+
             // The Hub listener in App.tsx will handle the state update
             // No need for manual page reload - the auth state will update automatically
-            
+
         } catch (error: unknown) {
             console.error('Failed to sign in', error);
             if (error instanceof Error) {
@@ -92,6 +92,12 @@ function SignInForm({ onAuthSuccess }: SignInFormProps) {
                 <div className="form-header">
                     <h1>Welcome Back</h1>
                     <p>Sign in to continue to your AI tutoring sessions</p>
+                </div>
+
+                <div className="brand-message">
+                    <p className="brand-text">
+                        <span className="brand-name">AvanAI Tutor</span> is backed by <a href="https://aicodingtutor.org" target="_blank" rel="follow noopener noreferrer" className="brand-link">AICodingTutor.org</a>
+                    </p>
                 </div>
 
                 <div className="input-group">

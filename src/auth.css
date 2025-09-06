@@ -572,6 +572,64 @@
   line-height: var(--leading-relaxed);
 }
 
+/* Brand Message Styling */
+.brand-message {
+  margin: var(--space-3) 0 var(--space-4) 0;
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 182, 6, 0.05);
+  border: 1px solid rgba(255, 182, 6, 0.15);
+  border-radius: var(--radius-md);
+  text-align: center;
+  position: relative;
+  overflow: visible;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.brand-message::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  opacity: 0.6;
+}
+
+.brand-text {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: var(--leading-normal);
+  margin: 0;
+  font-weight: var(--font-weight-normal);
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
+}
+
+.brand-name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-link {
+  color: var(--primary-purple);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  transition: var(--transition-colors);
+  position: relative;
+}
+
+.brand-link:hover {
+  color: var(--primary-gold);
+  text-decoration: underline;
+}
+
 .input-group {
   width: 100%;
   margin-bottom: var(--space-4);
@@ -928,6 +986,15 @@
 
   .form-actions {
     gap: var(--space-3);
+  }
+
+  .brand-message {
+    margin: var(--space-3) 0 var(--space-4) 0;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .brand-text {
+    font-size: var(--text-xs);
   }
 }
 
